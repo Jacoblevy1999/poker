@@ -114,20 +114,24 @@ let rec best_four_kind (c:allseven) (acc)=
   |(k,v)::t -> if freq k (values_in_hand c) 0 < 4 then best_four_kind t acc
     else (add_all_value k c [])@(highest_n 1 (add_all_not_value k c []) [])
 
+let helper_comp (k1, v1) (k2, v2) = 
+  compare k1 k2
+
 let best_straight (c:allseven) (acc)=
   let rec straight_sorter lst acc = 
     match lst with
     |[] -> if List.length acc >= 5 then (Array.to_list (Array.sub (Array.of_list acc) 0 5))
       else []
-    |h::t -> if acc = [] then straight_sorter t [h] else
-      if h = 1+(List.hd acc) then straight_sorter t (h::acc) else straight_sorter t [h]
-  in straight_sorter (List.sort_uniq compare (values_in_hand c)) []
+    |(k,v)::t -> if acc = [] then straight_sorter t [(k,v)] else
+      if k = 1+(fst (List.hd acc)) then straight_sorter t ((k,v)::acc) else straight_sorter t [(k,v)]
+  in straight_sorter (List.sort_uniq helper_comp c) []
 
 let best_straight_flush c = 
   if best_flush c [] <> [] && best_straight c [] <> [] then best_straight c [] else []
 
 let is_royal_flush c = 
-  if best_straight_flush c <> [] && List.hd (best_straight_flush c) = 12 then true else false
+  if best_straight_flush c <> [] && fst (List.hd (best_straight_flush c)) = 12 
+  then best_straight_flush c else []
 
 let helper_comp (e1) (e2) = 
   match e1, e2 with
@@ -164,4 +168,21 @@ let best_fh c =
     let p = one_pair (add_all_not_value (fst (List.hd tk)) c []) in 
     tk@p 
   else []
+
+let rec first_non_empty (a:('a list) array) (index:int) = 
+  if a.(index) <> [] then index else first_non_empty a (index+1)
+
+let winner (h1:hand) (h2:hand) (t:table): string= 
+  let hand1 = Array.to_list (Array.concat [h1;t]) in
+  let hand2 = Array.to_list (Array.concat [h2;t]) in
+  let hchy1 = Array.of_list [is_royal_flush hand1;best_straight_flush hand1
+                            ;best_four_kind hand1 [];best_fh hand1;best_flush hand1 [];
+                             best_straight hand1 [];three_kind hand1 [];two_pair hand1;
+                             one_pair hand1;highest_n 5 hand1 []] in
+  let hchy2 = Array.of_list [is_royal_flush hand2;best_straight_flush hand2
+                            ;best_four_kind hand2 [];best_fh hand2;best_flush hand2 [];
+                             best_straight hand2 [];three_kind hand2 [];two_pair hand2;
+                             one_pair hand2;highest_n 5 hand2 []] in
+  if (first_non_empty hchy1 0) < (first_non_empty hchy2 0) then "player 1" else
+  if (first_non_empty hchy1 0) > (first_non_empty hchy2 0) then "player 2" else "tie"
 
