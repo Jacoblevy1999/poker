@@ -59,6 +59,9 @@ let rec freq elt lst acc=
   | [] -> acc
   |h::t -> if h = elt then freq elt t (acc+1) else freq elt t acc
 
+let helper_comp (k1, v1) (k2, v2) = 
+  (-1)*(compare k1 k2)
+
 let suits_in_hand (c:allseven)= 
   snd (List.split c)
 
@@ -101,21 +104,20 @@ let rec add_all_suit s (c:allseven) acc=
   |(k,v)::t -> if v = s then add_all_suit s t ((k,v)::acc) else
       add_all_suit s t acc
 
-let rec best_flush (c:allseven) (acc)= 
+let rec all_flush (c:allseven) (acc)= 
   match c with
   |[] -> acc
-  |(k,v)::t -> if freq v (suits_in_hand c) 0 < 5 then best_flush t acc
-    else if freq v (suits_in_hand c) 0 = 5 then add_all_suit v c [] else
-      highest_n 5 (add_all_suit v c []) []
+  |(k,v)::t -> if freq v (suits_in_hand c) 0 < 5 then all_flush t acc
+    else add_all_suit v c []
+
+let best_flush c = 
+  highest_n 5 (all_flush c []) []
 
 let rec best_four_kind (c:allseven) (acc)=
   match c with
   |[] -> acc
   |(k,v)::t -> if freq k (values_in_hand c) 0 < 4 then best_four_kind t acc
     else (add_all_value k c [])@(highest_n 1 (add_all_not_value k c []) [])
-
-let helper_comp (k1, v1) (k2, v2) = 
-  compare k1 k2
 
 let best_straight (c:allseven) (acc)=
   let rec straight_sorter lst acc = 
@@ -127,62 +129,112 @@ let best_straight (c:allseven) (acc)=
   in straight_sorter (List.sort_uniq helper_comp c) []
 
 let best_straight_flush c = 
-  if best_flush c [] <> [] && best_straight c [] <> [] then best_straight c [] else []
+  if all_flush c [] <> [] && best_straight (all_flush c []) [] <> [] then 
+    best_straight (all_flush c []) [] else []
 
 let is_royal_flush c = 
   if best_straight_flush c <> [] && fst (List.hd (best_straight_flush c)) = 12 
   then best_straight_flush c else []
 
-let helper_comp (e1) (e2) = 
-  match e1, e2 with
-  |(k1, v1), (k2, v2) -> if k1 < k2 then 1 else if k1 > k2 then -1 else 0
-
 let rec three_kind c acc = 
   match c with
   |[] -> []
   |(k,v)::t -> if freq k (values_in_hand c) 0 < 3 then three_kind t acc
-    else let l = List.merge helper_comp (add_all_value k c []) (three_kind t [])
+    else let l = List.merge helper_comp (List.sort helper_comp (add_all_value k c [])) 
+             (List.sort helper_comp (three_kind t []))
       in (List.nth l 0)::(List.nth l 1)::(List.nth l 2)::[]
+
+let best_three_kind c = 
+  let fst_3 = three_kind c [] in 
+  fst_3@(highest_n 3 (add_all_not_value (fst (List.hd fst_3)) c []) [])
 
 let rec pairs c acc = 
   match c with
   |[] -> []
   |(k,v)::t -> if (freq k (values_in_hand c) 0) < 2 then pairs t acc
-    else let l = List.merge helper_comp (add_all_value k c []) (pairs t [])
+    else let l = List.merge helper_comp (List.sort helper_comp (add_all_value k c [])) 
+             (List.sort helper_comp (pairs t []))
       in if List.length l > 4 then 
         (List.nth l 0)::(List.nth l 1)::(List.nth l 2)::(List.nth l 3)::[] else
         l
 
 let two_pair c = 
   let p = pairs c [] in
-  if List.length p >= 4 then p else []
+  if List.length p = 4 then p@(highest_n 1 (add_all_not_value (fst (List.hd p)) c []) [])
+  else []
 
 let one_pair c = 
   let p = pairs c [] in
-  if List.length p = 2 then (List.nth p 0)::(List.nth p 1)::[] else
-    []
+  if List.length p = 2 then 
+    p@(highest_n 3 (add_all_not_value (fst (List.hd p)) c []) [])
+  else []
 
 let best_fh c = 
   let tk = (three_kind c []) in
-  if tk <> [] && one_pair (add_all_not_value (fst (List.hd tk)) c []) <> [] then
-    let p = one_pair (add_all_not_value (fst (List.hd tk)) c []) in 
+  if tk <> [] && pairs (add_all_not_value (fst (List.hd tk)) c []) [] <> [] then
+    let p = Array.to_list (Array.sub (Array.of_list
+                                        (pairs (add_all_not_value 
+                                                  (fst (List.hd tk)) c []) [])) 0 2) in 
     tk@p 
   else []
 
 let rec first_non_empty (a:('a list) array) (index:int) = 
   if a.(index) <> [] then index else first_non_empty a (index+1)
 
+let rec max lst acc= 
+  match lst with
+  |[] -> acc
+  |h::t -> if h>acc then max t h else max t acc
+
+let rec break_high h1 h2 = 
+  match h1, h2 with
+  |[], [] -> "tie"
+  |_, _ -> if max (values_in_hand h1) 0 > max (values_in_hand h2) 0 then "player 1" else 
+    if max (values_in_hand h1) 0 < max (values_in_hand h2) 0 then "player 2" else
+      break_high (List.remove_assoc (max (values_in_hand h1) 0) h1) 
+        (List.remove_assoc (max (values_in_hand h2) 0) h2)
+
+let break_group n h1 h2 = 
+  if break_high (Array.to_list (Array.sub (Array.of_list h1) 0 n)) 
+      (Array.to_list (Array.sub (Array.of_list h2) 0 n)) <> "tie" then
+    break_high (Array.to_list (Array.sub (Array.of_list h1) 0 n)) 
+      (Array.to_list (Array.sub (Array.of_list h2) 0 n)) else 
+    break_high h1 h2
+
+let break_mult_group n1 n2 h1 h2 = 
+  if break_high (Array.to_list (Array.sub (Array.of_list h1) 0 n1)) 
+      (Array.to_list (Array.sub (Array.of_list h2) 0 n1)) <> "tie" then
+    break_high (Array.to_list (Array.sub (Array.of_list h1) 0 n1)) 
+      (Array.to_list (Array.sub (Array.of_list h2) 0 n1)) else
+  if break_high (Array.to_list (Array.sub (Array.of_list h1) n1 n2)) 
+      (Array.to_list (Array.sub (Array.of_list h2) n1 n2)) <> "tie" then
+    break_high (Array.to_list (Array.sub (Array.of_list h1) n1 n2)) 
+      (Array.to_list (Array.sub (Array.of_list h2) n1 n2)) else
+    break_high h1 h2
+
+
 let winner (h1:hand) (h2:hand) (t:table): string= 
   let hand1 = Array.to_list (Array.concat [h1;t]) in
   let hand2 = Array.to_list (Array.concat [h2;t]) in
   let hchy1 = Array.of_list [is_royal_flush hand1;best_straight_flush hand1
-                            ;best_four_kind hand1 [];best_fh hand1;best_flush hand1 [];
-                             best_straight hand1 [];three_kind hand1 [];two_pair hand1;
+                            ;best_four_kind hand1 [];best_fh hand1;best_flush hand1;
+                             best_straight hand1 [];best_three_kind hand1;two_pair hand1;
                              one_pair hand1;highest_n 5 hand1 []] in
   let hchy2 = Array.of_list [is_royal_flush hand2;best_straight_flush hand2
-                            ;best_four_kind hand2 [];best_fh hand2;best_flush hand2 [];
-                             best_straight hand2 [];three_kind hand2 [];two_pair hand2;
+                            ;best_four_kind hand2 [];best_fh hand2;best_flush hand2;
+                             best_straight hand2 [];best_three_kind hand2;two_pair hand2;
                              one_pair hand2;highest_n 5 hand2 []] in
   if (first_non_empty hchy1 0) < (first_non_empty hchy2 0) then "player 1" else
-  if (first_non_empty hchy1 0) > (first_non_empty hchy2 0) then "player 2" else "tie"
+  if (first_non_empty hchy1 0) > (first_non_empty hchy2 0) then "player 2" else
+    let r = first_non_empty hchy1 0 in if r = 0 then "split" else if r = 1 then
+      break_high (best_straight_flush hand1) (best_straight_flush hand2) else if r = 2 then
+      break_group 4 (best_four_kind hand1 []) (best_four_kind hand2 []) else if r = 3 then
+      break_mult_group 3 2 (best_fh hand1) (best_fh hand2) else if r = 4 then
+      break_high (best_flush hand1) (best_flush hand2) else if r=5 then
+      break_high (best_straight hand1 []) (best_straight hand2 []) else if r=6 then
+      break_group 3 (best_three_kind hand1) (best_three_kind hand2) else if r=7 then
+      break_mult_group 2 2 (two_pair hand1) (two_pair hand2) else if r=8 then
+      break_group 2 (one_pair hand1) (one_pair hand2) else 
+      break_high (highest_n 5 hand1 []) (highest_n 5 hand2 [])
+
 
