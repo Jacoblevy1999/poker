@@ -1,0 +1,3 @@
+true: -traverse
+true: package(oUnit)
+<dir1> or <dir2>: traverse
