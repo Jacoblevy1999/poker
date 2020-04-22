@@ -2,13 +2,13 @@
 open Poker
 
 (**list of player 1's 2 card hand **)
-type player1_hand = card list
+type player1_hand = card array
 
 (**list of player 2;s 2 card hand **)
-type player2_hand = card list 
+type player2_hand = card array
 
 (**list of cards dealt on table **)
-type table = card list
+type table = card array
 
 (**list of 9 cards pulled from poker.deal that will be dealt, is a mutable
    array type so you can pull it out directly and will change**)
@@ -49,10 +49,12 @@ type t = { hand1 : player1_hand ; hand2 : player2_hand ;
    where you pull out who started on prior hand, and state_init will flip that **)
 let init_state cash1 cash2 ante started = 
 
+  let cards = Poker.shuffle (Poker.full_deck) (Array.of_list ([])) in 
+
   (**state is initialized but cards are assigned to random array list of 9 
      cards called from Poker.shuffle **)
-  { hand1 = [] ; hand2 = [] ; 
-    table = [] ; cards = Poker.shuffle ; cash1 = cash1 ; 
+  { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
+    table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
     cash2 = cash2 ; pot = 0 ; ante = ante ; turn = started
   ; started = started} 
 
@@ -66,14 +68,18 @@ let table st =
   st.table
 
 (**usually main should not be able to access this, just a helper function **)
-let player1_cash st =
+let cash1 st =
   st.cash1
 
-let player2_cash st =
+let cash2 st =
   st.cash2
 
 let pot st = 
   st.pot
+
+
+(**BEGINNING OF NON TURN BASED STATE FUNCTIONS ex deal, flop, turn river **)
+
 
 (**deals 2 cards to each player by taking off first 4 elements of 
    array st.cards, then auto bets the ante of each player.  **)
@@ -92,7 +98,7 @@ let deal st =
     hand2 = hand2 ; 
 
     (**during deal nothing put on table, stay as empty list **)
-    table = [] ; 
+    table = Array.of_list ([]) ; 
 
     (**remaining cards are whats left after dealing both hands **)
     cards = remainingcards ; 
@@ -114,6 +120,57 @@ let deal st =
     (**started stays consistent entire time unless initializing new state **)
     started = st.started
   }
+
+let flop st = 
+  (**have assert statement to confirm length of array st.cards is 5 if fails
+     then this action of flop is not possible **)
+  assert (Array.length st.cards == 5);
+
+  let flop = (Poker.flop (st.cards) (Array.of_list ([]))) in 
+  let remainingcards = (fst flop) in 
+  let table = (snd flop) in 
+
+  (**table gets reassigned, st.cards gets reassigned, everything else
+     stays untouched because no turn is made **)
+  { hand1 = st.hand1 ; hand2 = st.hand2 ; 
+    table = table ; cards = remainingcards ; cash1 = st.cash1 ; 
+    cash2 = st.cash2 ; pot = st.pot
+  ; ante = st.ante ; turn = st.turn
+  ; started = st.started} 
+
+
+let turn st = 
+
+  (**checks to make sure turn is a valid move **)
+  assert (Array.length st.cards == 2);
+
+  let turn = (Poker.turn (st.cards) (st.table)) in 
+  let remainingcards = (fst turn) in 
+  let table = (snd turn) in
+
+  { hand1 = st.hand1 ; hand2 = st.hand2 ; 
+    table = table ; cards = remainingcards ; cash1 = st.cash1 ; 
+    cash2 = st.cash2 ; pot = st.pot
+  ; ante = st.ante ; turn = st.turn
+  ; started = st.started} 
+
+let river st = 
+  (**checks to make sure turn is a valid move **)
+  assert (Array.length st.cards == 1);
+  let table = (Poker.river (st.cards) (st.table)) in 
+
+  { hand1 = st.hand1 ; hand2 = st.hand2 ; 
+    table = table ; cards = Array.of_list ([]) ; cash1 = st.cash1 ; 
+    cash2 = st.cash2 ; pot = st.pot
+  ; ante = st.ante ; turn = st.turn
+  ; started = st.started} 
+
+
+(**END OF NON TURN BASED FUNCTIONS **)
+
+
+(*BEGINNING OF TURN BASED FUNCTIONS **)
+
 
 (**takes state and just creates a new initialized state with empty hands and 
    the pot distributed to winner, fold dependent on player turn**)
@@ -146,25 +203,27 @@ let bet st amt =
         (**if player1 turn then bet amount subtracted from player1_cash **)
         cash1 = (st.cash1 - amt) ; 
         cash2 = st.cash2 ; pot = (st.pot + amt) ; ante = st.ante ; 
+        turn = -(st.turn) ; started = st.started} 
+
+    else failwith "Not enough cash"
+
+
+  | -1 -> if (amt < st.cash2)
+    then
+      { 
+        (**hands table cards and randomized cards stay same **)
+        hand1 = st.hand1 ; hand2 = st.hand2 ; 
+        table = st.table ; cards = st.cards ; 
+
+
+        (**if player2 turn then bet amount subtracted from st.cash2 **)
+        cash1 = (st.cash1) ; 
+        cash2 = (st.cash2-amt) ; pot = (st.pot + amt) ; ante = st.ante ; 
         turn = -(st.turn) ; started = st.started)} 
 
 else failwith "Not enough cash"
 
-
-| -1 -> if (amt < st.cash2)
-then
-  { 
-    (**hands table cards and randomized cards stay same **)
-    hand1 = st.hand1 ; hand2 = st.hand2 ; 
-    table = st.table ; cards = st.cards ; 
-
-
-    (**if player2 turn then bet amount subtracted from st.cash2 **)
-    cash1 = (st.cash1) ; 
-    cash2 = (st.cash2-amt) ; pot = (st.pot + amt) ; ante = st.ante ; 
-    turn = -(st.turn) ; started = st.started)} 
-
-else failwith "Not enough cash"
+| _ -> failwith "Not possible"
 
 (**check does not change anything, just moves the turn counter **)
 let check st = 
@@ -172,8 +231,10 @@ let check st =
     table = st.table ; cards = st.cards ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; turn = -(st.turn)
-  ; started = st.started)} 
+  ; started = st.started} 
 
+(**declares winner between two hands and all table hands and declares winner 
+   by moving pot over and resetting hands **)
 let winner st = 
   failwith "Unimplemented"
 
@@ -182,7 +243,7 @@ let winner st =
 
 
 
-
+(**END OF TURN BASED FUNCTIONS **)
 
 
 
