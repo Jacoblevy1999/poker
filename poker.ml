@@ -145,8 +145,9 @@ let rec three_kind c acc =
       in (List.nth l 0)::(List.nth l 1)::(List.nth l 2)::[]
 
 let best_three_kind c = 
-  let fst_3 = three_kind c [] in 
-  fst_3@(highest_n 3 (add_all_not_value (fst (List.hd fst_3)) c []) [])
+  if three_kind c [] = [] then [] else
+    let fst_3 = three_kind c [] in 
+    fst_3@(highest_n 2 (add_all_not_value (fst (List.hd fst_3)) c []) [])
 
 let rec pairs c acc = 
   match c with
@@ -189,10 +190,11 @@ let rec max lst acc=
 let rec break_high h1 h2 = 
   match h1, h2 with
   |[], [] -> "tie"
-  |_, _ -> if max (values_in_hand h1) 0 > max (values_in_hand h2) 0 then "player 1" else 
-    if max (values_in_hand h1) 0 < max (values_in_hand h2) 0 then "player 2" else
-      break_high (List.remove_assoc (max (values_in_hand h1) 0) h1) 
-        (List.remove_assoc (max (values_in_hand h2) 0) h2)
+  |_, _ -> let m1  = max (values_in_hand h1) 0 in
+    let m2 = max (values_in_hand h2) 0 in
+    if m1 > m2 then "player 1" else 
+    if m1 < m2 then "player 2" else
+      break_high (List.remove_assoc (m1) h1) (List.remove_assoc (m2) h2)
 
 let break_group n h1 h2 = 
   if break_high (Array.to_list (Array.sub (Array.of_list h1) 0 n)) 
@@ -226,7 +228,7 @@ let winner (h1:hand) (h2:hand) (t:table): string=
                              one_pair hand2;highest_n 5 hand2 []] in
   if (first_non_empty hchy1 0) < (first_non_empty hchy2 0) then "player 1" else
   if (first_non_empty hchy1 0) > (first_non_empty hchy2 0) then "player 2" else
-    let r = first_non_empty hchy1 0 in if r = 0 then "split" else if r = 1 then
+    let r = first_non_empty hchy1 0 in if r = 0 then "tie" else if r = 1 then
       break_high (best_straight_flush hand1) (best_straight_flush hand2) else if r = 2 then
       break_group 4 (best_four_kind hand1 []) (best_four_kind hand2 []) else if r = 3 then
       break_mult_group 3 2 (best_fh hand1) (best_fh hand2) else if r = 4 then
@@ -236,5 +238,15 @@ let winner (h1:hand) (h2:hand) (t:table): string=
       break_mult_group 2 2 (two_pair hand1) (two_pair hand2) else if r=8 then
       break_group 2 (one_pair hand1) (one_pair hand2) else 
       break_high (highest_n 5 hand1 []) (highest_n 5 hand2 [])
+
+
+let d = shuffle full_deck (Array.of_list [])
+let h1 = deal d (Array.of_list [])
+let h2 = deal (fst h1) (Array.of_list [])
+let f = flop (fst h2) (Array.of_list [])
+let t = turn (fst f) (snd f)
+let r = river (fst t) (snd t)
+let fs1 = snd h1
+let fs2 = snd h2
 
 
