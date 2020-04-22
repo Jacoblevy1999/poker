@@ -20,16 +20,16 @@ type allseven = card list
 
 
 
-let full_deck = Array.of_list [(0, "h");(1, "h");(2, "h");(3, "h");(4, "h");
-                               (5, "h");(6, "h");(7, "h");(8, "h");(9, "h");
-                               (10, "h");(11, "h");(12, "h");(0, "d");(1, "d");
-                               (2, "d");(3, "d");(4, "d");(5, "d");(6, "d");
-                               (7, "d");(8, "d");(9, "d");(10, "d");(11, "d");
-                               (12, "d");(0, "c");(1, "c");(2, "c");(3, "c");(4, "c");
-                               (5, "c");(6, "c");(7, "c");(8, "c");(9, "c");
-                               (10, "c");(11, "c");(12, "c");(0, "s");(1, "s");(2, "s");
-                               (3, "s");(4, "s");(5, "s");(6, "s");(7, "s");(8, "s");(9, "s");
-                               (10, "s");(11, "s");(12, "s")]
+let (full_deck:deck) = Array.of_list [(0, "h");(1, "h");(2, "h");(3, "h");(4, "h");
+                                      (5, "h");(6, "h");(7, "h");(8, "h");(9, "h");
+                                      (10, "h");(11, "h");(12, "h");(0, "d");(1, "d");
+                                      (2, "d");(3, "d");(4, "d");(5, "d");(6, "d");
+                                      (7, "d");(8, "d");(9, "d");(10, "d");(11, "d");
+                                      (12, "d");(0, "c");(1, "c");(2, "c");(3, "c");(4, "c");
+                                      (5, "c");(6, "c");(7, "c");(8, "c");(9, "c");
+                                      (10, "c");(11, "c");(12, "c");(0, "s");(1, "s");(2, "s");
+                                      (3, "s");(4, "s");(5, "s");(6, "s");(7, "s");(8, "s");(9, "s");
+                                      (10, "s");(11, "s");(12, "s")]
 
 let rec shuffle (fulldeck: card array) (acc:deck) : deck = 
   if Array.length acc = 9 then acc else
@@ -62,10 +62,10 @@ let rec freq elt lst acc=
 let helper_comp (k1, v1) (k2, v2) = 
   (-1)*(compare k1 k2)
 
-let suits_in_hand (c:allseven)= 
+let suits_in_hand c= 
   snd (List.split c)
 
-let rec values_in_hand (c:allseven)= 
+let rec values_in_hand c= 
   fst (List.split c)
 
 let rec minimum lst acc= 
@@ -84,49 +84,50 @@ let rec highest_n n c acc=
   | [] -> acc
   | (k,v)::t -> if List.length acc < n then highest_n n t ((k,v)::acc) else
       let m = minimum (values_in_hand acc) 0 in 
-      if k < m then highest_n n t (replace acc m (k,v)) else highest_n n t acc
+      if k > m then highest_n n t (replace acc m (k,v)) else highest_n n t acc
 
-let rec add_all_value v (c:allseven) acc=
+let rec add_all_value v (c) acc=
   match c with
   |[] -> acc
   |(k1,v1)::t -> if k1 = v then add_all_value v t ((k1,v1)::acc) else
       add_all_value v t acc
 
-let rec add_all_not_value v (c:allseven) acc=
+let rec add_all_not_value v c acc=
   match c with
   |[] -> acc
   |(k1,v1)::t -> if k1 <> v then add_all_not_value v t ((k1,v1)::acc) else
       add_all_not_value v t acc
 
-let rec add_all_suit s (c:allseven) acc=
+let rec add_all_suit s (c) acc=
   match c with
   |[] -> acc
   |(k,v)::t -> if v = s then add_all_suit s t ((k,v)::acc) else
       add_all_suit s t acc
 
-let rec all_flush (c:allseven) (acc)= 
+let rec all_flush (c) (acc)= 
   match c with
   |[] -> acc
   |(k,v)::t -> if freq v (suits_in_hand c) 0 < 5 then all_flush t acc
     else add_all_suit v c []
 
 let best_flush c = 
-  highest_n 5 (all_flush c []) []
+  if all_flush c [] = [] then [] else
+    highest_n 5 (all_flush c []) []
 
-let rec best_four_kind (c:allseven) (acc)=
+let rec best_four_kind (c) (acc)=
   match c with
   |[] -> acc
   |(k,v)::t -> if freq k (values_in_hand c) 0 < 4 then best_four_kind t acc
     else (add_all_value k c [])@(highest_n 1 (add_all_not_value k c []) [])
 
-let best_straight (c:allseven) (acc)=
+let best_straight (c) (acc)=
   let rec straight_sorter lst acc = 
     match lst with
-    |[] -> if List.length acc >= 5 then (Array.to_list (Array.sub (Array.of_list acc) 0 5))
+    |[] -> if List.length acc >= 5 then (Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 5))
       else []
     |(k,v)::t -> if acc = [] then straight_sorter t [(k,v)] else
       if k = 1+(fst (List.hd acc)) then straight_sorter t ((k,v)::acc) else straight_sorter t [(k,v)]
-  in straight_sorter (List.sort_uniq helper_comp c) []
+  in straight_sorter (List.rev (List.sort_uniq helper_comp c)) []
 
 let best_straight_flush c = 
   if all_flush c [] <> [] && best_straight (all_flush c []) [] <> [] then 
@@ -215,7 +216,7 @@ let break_mult_group n1 n2 h1 h2 =
     break_high h1 h2
 
 
-let winner (h1:hand) (h2:hand) (t:table): string= 
+let winner (h1) (h2) (t): string= 
   let hand1 = Array.to_list (Array.concat [h1;t]) in
   let hand2 = Array.to_list (Array.concat [h2;t]) in
   let hchy1 = Array.of_list [is_royal_flush hand1;best_straight_flush hand1
