@@ -1,5 +1,5 @@
 (**Open Poker **)
-open poker
+open Poker
 
 (**list of player 1's 2 card hand **)
 type player1_hand = card list
@@ -173,6 +173,9 @@ let check st =
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; turn = -(st.turn)
   ; started = st.started)} 
+
+let winner st = 
+  failwith "Unimplemented"
 
 
 
