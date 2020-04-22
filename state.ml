@@ -23,42 +23,163 @@ type player2_cash = int
 (**value of pot **)
 type pot = int
 
+(**pre-determined ante amount from poker customization **)
+type ante = int
 
-type t = { player1_hand : player1_hand ; player2_hand : player2_hand ; 
-           table : table ; cards : cards ; player1_cash : player1_cash ; 
-           player2_cash : player2_cash ; pot : pot} 
+(**indicates which player's turn it is, [1] for player 1 and [-1] for player 2,
+   can only ever be [1] or [-1]**)
+type turn = int
+
+(**indicates which player started the hand, [1] for player 1 and [-1] for 
+   player 2, only ever changed when initialized**)
+type started = int 
 
 
-(**initializes type state, always called when starting new hand **)
-let init_state hand1 hand2 table cards cash1 cash2 pot = 
+type t = { hand1 : player1_hand ; hand2 : player2_hand ; 
+           table : table ; cards : cards ; cash1 : player1_cash ; 
+           cash2 : player2_cash ; pot : pot ; ante : ante ; turn : turn
+         ; started : started} 
+
+
+(**initializes type state, always called when starting new hand therefore the 
+   only information passing from one round to another is the amount of
+   cash each player has left and their ante**)
+
+(**started is whoever started prior, from main access this as State.started 
+   where you pull out who started on prior hand, and state_init will flip that **)
+let init_state cash1 cash2 ante started = 
 
   (**state is initialized but cards are assigned to random array list of 9 
      cards called from Poker.shuffle **)
-  { player1_hand : hand1 ; player2_hand : hand2 ; 
-    table : table ; cards : Poker.shuffle ; player1_cash : cash1 ; 
-    player2_cash : cash2 ; pot : 0} 
+  { hand1 = [] ; hand2 = [] ; 
+    table = [] ; cards = Poker.shuffle ; cash1 = cash1 ; 
+    cash2 = cash2 ; pot = 0 ; ante = ante ; turn = started
+  ; started = started} 
 
 let hand1 st = 
-  st.player1_hand
+  st.hand1
 
 let hand2 st = 
-  st.player2_hand
+  st.hand2
 
 let table st =
   st.table
 
 (**usually main should not be able to access this, just a helper function **)
-let cards st = 
-  st.cards
-
 let player1_cash st =
-  st.player1_cash
+  st.cash1
 
 let player2_cash st =
-  st.player2_cash
+  st.cash2
 
 let pot st = 
   st.pot
+
+(**deals 2 cards to each player by taking off first 4 elements of 
+   array st.cards, then auto bets the ante of each player.  **)
+let deal st = 
+
+  let hand1 = snd (Poker.deal (st.cards) (Array.of_list ([]))) in 
+  let remaining1 = fst (Poker.deal (st.cards) (Array.of_list ([]))) in 
+  let hand2 = snd (Poker.deal (remaining1) (Array.of_list ([]))) in 
+  let remainingcards = fst (Poker.deal (remaining1) (Array.of_list ([]))) in 
+
+  {
+    (**returns hand1 as list of 2 cards **)
+    hand1 = hand1 ; 
+
+    (**returns hand2 as list of 2 cards **)
+    hand2 = hand2 ; 
+
+    (**during deal nothing put on table, stay as empty list **)
+    table = [] ; 
+
+    (**remaining cards are whats left after dealing both hands **)
+    cards = remainingcards ; 
+
+    (**player cash does not change during deal **)
+    cash1 = st.cash1 ; 
+    cash2 = st.cash2 ; 
+
+    (**pot stays at 0 after deal **)
+    pot = 0 ; 
+
+    (**ante stays the same after deal **)
+    ante = st.ante ; 
+
+    (**turn stays the same because dealing doesn't 
+       count as a move for player **)
+    turn = st.turn ;
+
+    (**started stays consistent entire time unless initializing new state **)
+    started = st.started
+  }
+
+(**takes state and just creates a new initialized state with empty hands and 
+   the pot distributed to winner, fold dependent on player turn**)
+let fold st = 
+
+  (**check who folds dependent on that is who you change the pot value **)
+  if (st.turn = 1) 
+
+  (**if player 1 turn, then intialize new hand with player 1 cash
+     same and player 2 gaining pot value **)
+  then init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
+
+  (**if player 2 turn, then initialize new hand with player 2 cash same
+     and player 1 gaining pot value **)
+  else init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
+
+
+(**takes in state and an amount and bets it dependent on player turn **)
+let bet st amt = 
+
+  match st.turn with 
+  | 1 -> if (amt < st.cash1)
+    then
+      { 
+        (**hands table cards and randomized cards stay same **)
+        hand1 = st.hand1 ; hand2 = st.hand2 ; 
+        table = st.table ; cards = st.cards ; 
+
+
+        (**if player1 turn then bet amount subtracted from player1_cash **)
+        cash1 = (st.cash1 - amt) ; 
+        cash2 = st.cash2 ; pot = (st.pot + amt) ; ante = st.ante ; 
+        turn = -(st.turn) ; started = st.started)} 
+
+else failwith "Not enough cash"
+
+
+| -1 -> if (amt < st.cash2)
+then
+  { 
+    (**hands table cards and randomized cards stay same **)
+    hand1 = st.hand1 ; hand2 = st.hand2 ; 
+    table = st.table ; cards = st.cards ; 
+
+
+    (**if player2 turn then bet amount subtracted from st.cash2 **)
+    cash1 = (st.cash1) ; 
+    cash2 = (st.cash2-amt) ; pot = (st.pot + amt) ; ante = st.ante ; 
+    turn = -(st.turn) ; started = st.started)} 
+
+else failwith "Not enough cash"
+
+(**check does not change anything, just moves the turn counter **)
+let check st = 
+  { hand1 = st.hand1 ; hand2 = st.hand2 ; 
+    table = st.table ; cards = st.cards ; cash1 = st.cash1 ; 
+    cash2 = st.cash2 ; pot = st.pot
+  ; ante = st.ante ; turn = -(st.turn)
+  ; started = st.started)} 
+
+
+
+
+
+
+
 
 
 
