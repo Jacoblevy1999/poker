@@ -1,11 +1,21 @@
+(**change cards to deck **)
+(**comments 
+
+   Ability to buy back in when not enough 
+
+   Add a element of state that just says what round it is
+   ex, after 
+
+   Maybe do a multi pronged state function - step through those elements **)
+
 (**Open Poker **)
 open Poker
 
 (**list of player 1's 2 card hand **)
-type player1_hand = card array
+type hand1 = card array
 
 (**list of player 2;s 2 card hand **)
-type player2_hand = card array
+type hand2 = card array
 
 (**list of cards dealt on table **)
 type table = card array
@@ -15,10 +25,10 @@ type table = card array
 type cards = card array
 
 (**value of player 1's cash **)
-type player1_cash = int
+type cash1 = int
 
 (**value of player 2's cash **)
-type player2_cash = int
+type cash2 = int
 
 (**value of pot **)
 type pot = int
@@ -36,14 +46,26 @@ type turn = int
 
 (**indicates which player started the hand, [1] for player 1 and [-1] for 
    player 2, only ever changed when initialized new hand with init_state**)
-type started = int 
+type started = int
 
+(**indicates which stage of the game state is currently at 
 
-type t = { hand1 : player1_hand ; hand2 : player2_hand ; 
-           table : table ; cards : cards ; cash1 : player1_cash ; 
-           cash2 : player2_cash ; pot : pot ; ante : ante ; 
+   Limited to [0,1,2,3,4]
+
+   Pre-deal stage = 0
+   Post-deal stage = 1
+   Post-flop stage = 2
+   Post-turn stage = 3
+   Post-river stage = 4
+
+ **)
+type stage = int
+
+type t = { hand1 : hand1 ; hand2 : hand2 ; 
+           table : table ; cards : cards ; cash1 : cash1 ; 
+           cash2 : cash2 ; pot : pot ; ante : ante ; 
            previous_bet : previous_bet ; turn : turn
-         ; started : started} 
+         ; started : started ; stage : stage} 
 
 
 (**initializes type state, always called when starting new hand therefore the 
@@ -61,7 +83,7 @@ let init_state cash1 cash2 ante started =
   { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
     table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
     cash2 = cash2 ; pot = 0 ; ante = ante ; previous_bet = 0 ; turn = started
-  ; started = started} 
+  ; started = started ; stage = 0} 
 
 
 (**returns player 1 hand **)
@@ -143,10 +165,13 @@ let deal st =
 
     (**turn stays the same because dealing doesn't 
        count as a move for player **)
-    turn = st.started ;
+    turn = st.turn ;
 
     (**started stays consistent entire time unless initializing new state **)
-    started = st.started
+    started = st.started ;
+
+    (**updates to post-deal stage **)
+    stage = 1
   }
 
 let flop st = 
@@ -164,7 +189,7 @@ let flop st =
     table = table ; cards = remainingcards ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; previous_bet = 0 ; turn = st.started
-  ; started = st.started} 
+  ; started = st.started ; stage = 2} 
 
 
 let turn st = 
@@ -180,7 +205,7 @@ let turn st =
     table = table ; cards = remainingcards ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; previous_bet = 0 ; turn = st.started
-  ; started = st.started} 
+  ; started = st.started ; stage = 3} 
 
 let river st = 
   (**checks to make sure turn is a valid move **)
@@ -191,7 +216,7 @@ let river st =
     table = table ; cards = Array.of_list ([]) ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; previous_bet = 0 ; turn = st.started
-  ; started = st.started} 
+  ; started = st.started ; stage = 4} 
 
 
 (**declares winner between two hands and all table hands and declares winner 
@@ -272,8 +297,8 @@ let bet st amt =
            check or re-raise action **)
         previous_bet = amt ;
 
-        (**alternate turn, starting stays same **)
-        turn = -(st.turn) ; started = st.started} 
+        (**alternate turn, stage, starting stays same **)
+        turn = -(st.turn) ; started = st.started ; stage = st.stage} 
 
     else failwith "Not enough cash"
 
@@ -294,7 +319,7 @@ let bet st amt =
            check or re-raise action **)
         previous_bet = amt ;
 
-        turn = -(st.turn) ; started = st.started} 
+        turn = -(st.turn) ; started = st.started ; stage = st.stage} 
 
     else failwith "Not enough cash"
 
@@ -331,7 +356,7 @@ let raise st amt =
       previous_bet = amt ;
 
       (**alternate turn, starting stays same **)
-      turn = -(st.turn) ; started = st.started} 
+      turn = -(st.turn) ; started = st.started ; stage = st.stage} 
   | -1 -> 
 
     (**Check if player1 has enough cash2 to raise the previous_bet**)
@@ -352,7 +377,7 @@ let raise st amt =
       previous_bet = amt ;
 
       (**alternate turn, starting stays same **)
-      turn = -(st.turn) ; started = st.started} 
+      turn = -(st.turn) ; started = st.started ; stage = st.stage} 
 
   | _ -> failwith "Invalid Command"
 
@@ -386,7 +411,7 @@ let call st =
       previous_bet = 0 ;
 
       (**alternate turn, starting stays same **)
-      turn = -(st.turn) ; started = st.started} 
+      turn = -(st.turn) ; started = st.started ; stage = st.stage} 
   | -1 -> 
 
     (**failsafe to check if player1 has enough cash1 to call the previous_bet **)
@@ -407,7 +432,7 @@ let call st =
       previous_bet = 0 ;
 
       (**alternate turn, starting stays same **)
-      turn = -(st.turn) ; started = st.started} 
+      turn = -(st.turn) ; started = st.started ; stage = st.stage} 
 
   | _ -> failwith "Invalid Command"
 
@@ -418,7 +443,7 @@ let check st =
     table = st.table ; cards = st.cards ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; previous_bet = 0 ; turn = -(st.turn)
-  ; started = st.started} 
+  ; started = st.started ; stage = st.stage} 
 
 (**END OF TURN BASED FUNCTIONS **)
 
