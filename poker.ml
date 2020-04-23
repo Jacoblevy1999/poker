@@ -251,3 +251,14 @@ let fs1 = snd h1
 let fs2 = snd h2
 
 
+let val_dict  = Array.of_list ["two of";"three of";"four of";"five of";"six of";"seven of";
+                               "eight of";"nine of";"ten of";"jack of";"queen of";"king of";"ace of"]
+let rec format_lst c= 
+  let rec w_commas = function
+    |[] -> ""
+    |(k,v)::t -> if v = "h" then (val_dict.(k))^" hearts, "^(w_commas t) else
+      if v = "d" then (val_dict.(k))^" diamonds, "^(w_commas t) else
+      if v = "s" then (val_dict.(k))^" spades, "^(w_commas t) else
+        (val_dict.(k))^" clubs, "^(w_commas t) in
+  String.sub (w_commas c) 0 (String.length (w_commas c)-2)
+
