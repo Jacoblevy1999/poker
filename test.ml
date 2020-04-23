@@ -57,6 +57,9 @@ let tests = "poker test suite" >::: [
     "high card same 2 pair" >:: (fun _ -> assert_equal "player 1" (winner (hand 48 51) (hand 50 49) (b_five 0 1 3 14 13)));
     "flush beats straight" >:: (fun _ -> assert_equal "player 1" (winner (hand 0 10) (hand 50 49) (b_five 0 1 3 14 13)));
     "straight beats pair" >:: (fun _ -> assert_equal "player 2" (winner (hand 0 51) (hand 20 21) (b_five 4 5 6 14 13)));
+    "order on table doesn't matter" >:: (fun _ -> assert_equal "player 2" (winner (hand 0 51) (hand 20 21) (b_five 6 5 13 14 4)));
+    "better full house" >:: (fun _ -> assert_equal "player 2" (winner (hand 0 38) (hand 1 25) (b_five 51 12 14 13 35)));
+    "pair with higher cards" >:: (fun _ -> assert_equal "player 1" (winner (hand 38 4) (hand 19 3) (b_five 12 23 22 47 0)));
   ]
 
 
