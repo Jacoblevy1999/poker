@@ -1,8 +1,6 @@
-open Poker
+open Poker 
 
-type move_phrase = string list 
-
-type bet = int
+type move_phrase = string list
 
 type move = 
   (* Calling is matching the amount that has been put in by another player in the form of a bet or a raise. *)
@@ -16,7 +14,9 @@ type move =
   (* Raising is betting more than the previous bet on the table. *)
   |Raise of int
   |Buy_in of int
+  |Help
   |Quit
+
 
 
 exception Empty 
@@ -60,10 +60,13 @@ let parse str =
     |"fold", [] -> Fold
     |"call", [] -> Call
     |"check", [] -> Check 
+    |"raise", [] -> Raise (-1)
     |"raise", [bet] -> Raise (int_of_string bet)
     |"bet", [bet] -> Bet (int_of_string bet)
     |"quit", [] -> Quit
+    |"buy", "in"::[] -> Buy_in (-1)
     |"buy", "in"::[amount] -> Buy_in (int_of_string amount)
+    |"help", [] -> Help
     |_, _ -> raise(Invalid_move)
 
 
