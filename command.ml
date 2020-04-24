@@ -16,6 +16,7 @@ type move =
   |Buy_in of int
   |Help
   |Quit
+  |Loop
 
 
 
