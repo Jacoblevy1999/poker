@@ -31,7 +31,8 @@ let (full_deck:deck) = Array.of_list [(0, "h");(1, "h");(2, "h");(3, "h");(4, "h
                                       (3, "s");(4, "s");(5, "s");(6, "s");(7, "s");(8, "s");(9, "s");
                                       (10, "s");(11, "s");(12, "s")]
 
-let rec shuffle (fulldeck: card array) (acc:deck) : deck = 
+let rec shuffle (fulldeck: card array) (acc:deck) : deck =
+  Random.self_init(); 
   if Array.length acc = 9 then acc else
     let pos = Random.int (Array.length fulldeck) in 
     shuffle (Array.concat [(Array.sub fulldeck 0 pos);(Array.sub fulldeck (pos+1) ((Array.length fulldeck)-pos-1))]) 
@@ -124,6 +125,8 @@ let best_straight (c) (acc)=
   let rec straight_sorter lst acc = 
     match lst with
     |[] -> if List.length acc >= 5 then (Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 5))
+      else if List.length acc = 4 && fst (List.hd acc) = 0 && List.mem 12 (values_in_hand c)then 
+        (List.hd (add_all_value 12 c []))::(Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 4))
       else []
     |(k,v)::t -> if acc = [] then straight_sorter t [(k,v)] else
       if k = 1+(fst (List.hd acc)) then straight_sorter t ((k,v)::acc) else straight_sorter t [(k,v)]
@@ -253,6 +256,7 @@ let fs2 = snd h2
 
 let val_dict  = Array.of_list ["two of";"three of";"four of";"five of";"six of";"seven of";
                                "eight of";"nine of";"ten of";"jack of";"queen of";"king of";"ace of"]
+
 let rec format_lst c= 
   let rec w_commas = function
     |[] -> ""
