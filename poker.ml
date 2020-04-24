@@ -46,14 +46,14 @@ let rec deal (deck:deck) (hand:hand) : deck * hand =
 let rec flop (deck:deck) (table:table) : deck * table = 
   if Array.length table = 3 then (deck, table) else
     flop (Array.sub deck 1 (Array.length deck-1)) 
-      (Array.of_list (deck.(0)::(Array.to_list table)))
+      (Array.concat [(table);(Array.sub deck 0 1)])
 
 let turn (deck:deck) (table:table) : deck * table = 
   ((Array.sub deck 1 1),
-   (Array.of_list (deck.(0)::(Array.to_list table))))
+   (Array.concat [(table);(Array.sub deck 0 1)]))
 
 let river (deck:deck) (table:table) : table = 
-  (Array.of_list (deck.(0)::(Array.to_list table)))
+  (Array.concat [(table);(Array.sub deck 0 1)])
 
 let rec freq elt lst acc= 
   match lst with 
