@@ -136,7 +136,6 @@ let deal st =
   let remaining1 = fst (Poker.deal (st.cards) (Array.of_list ([]))) in 
   let hand2 = snd (Poker.deal (remaining1) (Array.of_list ([]))) in 
   let remainingcards = fst (Poker.deal (remaining1) (Array.of_list ([]))) in 
-
   {
     (**returns hand1 as list of 2 cards **)
     hand1 = hand1 ; 
@@ -182,6 +181,7 @@ let flop st =
   let flop = (Poker.flop (st.cards) (Array.of_list ([]))) in 
   let remainingcards = (fst flop) in 
   let table = (snd flop) in 
+  print_string "The cards on the table are "; print_endline (Array.to_list table |> format_lst);
 
   (**table gets reassigned, st.cards gets reassigned, everything else
      stays untouched because no turn is made **)
@@ -200,7 +200,7 @@ let turn st =
   let turn = (Poker.turn (st.cards) (st.table)) in 
   let remainingcards = (fst turn) in 
   let table = (snd turn) in
-
+  print_string "The cards on the table are "; print_endline (Array.to_list table |> format_lst);
   { hand1 = st.hand1 ; hand2 = st.hand2 ; 
     table = table ; cards = remainingcards ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
@@ -211,7 +211,7 @@ let river st =
   (**checks to make sure turn is a valid move **)
   assert (Array.length st.cards == 1);
   let table = (Poker.river (st.cards) (st.table)) in 
-
+  print_string "The cards on the table are "; print_endline (Array.to_list table |> format_lst);
   { hand1 = st.hand1 ; hand2 = st.hand2 ; 
     table = table ; cards = Array.of_list ([]) ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot

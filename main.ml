@@ -2,19 +2,18 @@ open Poker
 open State 
 open Command
 
-(** [remove_dsign str] takes a string of the form of a dollar sign ($) followed
-    by an integer and returns the integer as type int. 
-    Example: [remove_dsign "$25"] returns [25]. *)
-let remove_dsign str = 
-  let list = String.split_on_char '$' str in 
-  match list with 
-  |""::[t] -> int_of_string t 
-  |_ -> failwith "Not the right form"
+let who's_turn state = 
+  if state.turn = 1 then print_string "It is player 1's turn. > "
+  else print_string "It is player 2's turn. > "
 
 let rec loop state : unit = 
-  if state.stage = 0 then loop (deal state) else
+  if state.stage = 0 then loop (deal state)
+  else if state.stage = 1 then loop (flop state)
+  else if state.stage = 2 then loop (turn state) 
+  else if state.stage = 3 then loop (river state)
+  else 
     let move = read_line () in
-    let command = try (Command.parse move) with Invalid_move -> (Loop) in
+    let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
     match command with
     |Call -> loop (call state)
     |Check -> loop (check state)
@@ -30,15 +29,20 @@ let rec loop state : unit =
       print_endline "To raise a bet, type 'raise [amount]', i.e. 'riase $30' will raise the bet by $30.";
       print_endline "To call, type 'call'.";
       print_endline "To fold, type 'fold'.";
+      print_endline "To see player 1's cards, enter 'p1 cards'";
+      print_endline"To see player 2's cards, enter 'p2 cards'";
       print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
       print_endline "To quit, type 'quit'.";
       print_endline "To see this list of commands again, type 'help'.";
+      who's_turn state;
+    |Cards1 -> print_endline (Array.to_list (state.hand1) |> format_lst); loop state
+    |Cards2 -> print_endline (Array.to_list (state.hand2) |> format_lst); loop state
     |Quit -> print_endline "Thanks for playing!" ; exit 0
     |Loop -> loop state
 
 let play_game =
   print_endline "How much money is each player gambling with? 
-  Type an amount between $10 and $100000 and then hit enter.";
+    Type an amount between $10 and $100000 and then hit enter.";
   print_string  "> ";
   let buy_in_str = read_line () in 
   let buy_in_int = remove_dsign buy_in_str in 
@@ -52,6 +56,8 @@ let play_game =
   print_endline "To raise a bet, type 'raise [amount]', i.e. 'riase $30' will raise the bet by $30.";
   print_endline "To call, type 'call'.";
   print_endline "To fold, type 'fold'.";
+  print_endline "To see player 1's cards, enter 'p1 cards'";
+  print_endline "To see player 2's cards, enter 'p2 cards'";
   print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
   print_endline "To quit, type 'quit'.";
   print_endline "To see this list of commands again, type 'help'.";
@@ -62,7 +68,7 @@ let play_game =
 let rec main () =
   print_endline
     "\n\nWelcome, are you ready to take a seat at the table and 
-                  play heads up poker?\n";
+  play heads up poker?\n";
   print_endline "Type 'play' and then press enter when you're ready to start.\n";
   print_string  "> ";
   match read_line () with

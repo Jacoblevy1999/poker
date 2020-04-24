@@ -14,6 +14,10 @@ type move =
   (* Raising is betting more than the previous bet on the table. *)
   |Raise of int
   |Buy_in of int
+  |Cards1
+  |Cards2
+  |Cash1
+  |Cash2
   |Help
   |Quit
   |Loop
@@ -21,7 +25,7 @@ type move =
 
 
 exception Empty 
-exception Invalid_move
+exception Invalid_move 
 
 (* [parse_helper str] returns the list of strings with all spaces and empty 
    strings removed. The list is in the same order as the original string.
@@ -52,6 +56,15 @@ let rec is_phrase_wellformed strlst =
     |[] -> true
     |h::t -> if h = " " || h = "" then raise(Invalid_move) else true 
 
+(** [remove_dsign str] takes a string of the form of a dollar sign ($) followed
+    by an integer and returns the integer as type int. 
+    Example: [remove_dsign "$25"] returns [25]. *)
+let remove_dsign str = 
+  let list = String.split_on_char '$' str in 
+  match list with 
+  |""::[t] -> int_of_string t 
+  |_ -> failwith "Not the right form"
+
 let parse str = 
   let move = str_to_strlst str in
   match move with 
@@ -62,12 +75,18 @@ let parse str =
     |"call", [] -> Call
     |"check", [] -> Check 
     |"raise", [] -> Raise (-1)
-    |"raise", [bet] -> Raise (int_of_string bet)
-    |"bet", [bet] -> Bet (int_of_string bet)
+    |"raise", [bet] -> Raise (remove_dsign bet)
+    |"bet", [bet] -> Bet (remove_dsign bet)
     |"quit", [] -> Quit
     |"buy", "in"::[] -> Buy_in (-1)
-    |"buy", "in"::[amount] -> Buy_in (int_of_string amount)
+    |"buy", "in"::[amount] -> Buy_in (remove_dsign amount)
     |"help", [] -> Help
+    |"p1", [x] -> if x = "cards" then Cards1 
+      else if x = "cash" then Cash1
+      else raise(Invalid_move)
+    |"p2", [y] -> if y = "cards" then Cards2 
+      else if y = "cash" then Cash2 
+      else raise(Invalid_move)
     |_, _ -> raise(Invalid_move)
 
 
