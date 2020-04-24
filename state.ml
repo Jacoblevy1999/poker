@@ -8,8 +8,9 @@
 
    Maybe do a multi pronged state function - step through those elements **)
 
-(**Open Poker **)
+(**Open Poker and Command**)
 open Poker
+open Command
 
 (**list of player 1's 2 card hand **)
 type hand1 = card array
@@ -61,11 +62,16 @@ type started = int
  **)
 type stage = int
 
+(**indicates what the previous move was stored as type Command ALWAYS a
+   move [list] of length 1 cause there is only ever 1 previous move **)
+
+type previous_move = move list
+
 type t = { hand1 : hand1 ; hand2 : hand2 ; 
            table : table ; cards : cards ; cash1 : cash1 ; 
            cash2 : cash2 ; pot : pot ; ante : ante ; 
            previous_bet : previous_bet ; turn : turn
-         ; started : started ; stage : stage} 
+         ; started : started ; stage : stage ; previous_move : previous_move} 
 
 
 (**initializes type state, always called when starting new hand therefore the 
@@ -83,7 +89,7 @@ let init_state cash1 cash2 ante started =
   { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
     table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
     cash2 = cash2 ; pot = 0 ; ante = ante ; previous_bet = 0 ; turn = started
-  ; started = started ; stage = 0} 
+  ; started = started ; stage = 0 ; previous_move = []} 
 
 
 (**returns player 1 hand **)
@@ -170,7 +176,10 @@ let deal st =
     started = st.started ;
 
     (**updates to post-deal stage **)
-    stage = 1
+    stage = 1 ;
+
+    (**at beginning of deal no previous_move **)
+    previous_move = []
   }
 
 let flop st = 
@@ -189,7 +198,7 @@ let flop st =
     table = table ; cards = remainingcards ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; previous_bet = 0 ; turn = st.started
-  ; started = st.started ; stage = 2} 
+  ; started = st.started ; stage = 2; previous_move = []} 
 
 
 let turn st = 
@@ -205,7 +214,7 @@ let turn st =
     table = table ; cards = remainingcards ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; previous_bet = 0 ; turn = st.started
-  ; started = st.started ; stage = 3} 
+  ; started = st.started ; stage = 3; previous_move = []} 
 
 let river st = 
   (**checks to make sure turn is a valid move **)
@@ -216,7 +225,7 @@ let river st =
     table = table ; cards = Array.of_list ([]) ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; previous_bet = 0 ; turn = st.started
-  ; started = st.started ; stage = 4} 
+  ; started = st.started ; stage = 4 ; previous_move = []} 
 
 
 (**declares winner between two hands and all table hands and declares winner 
@@ -298,7 +307,11 @@ let bet st amt =
         previous_bet = amt ;
 
         (**alternate turn, stage, starting stays same **)
-        turn = -(st.turn) ; started = st.started ; stage = st.stage} 
+        turn = -(st.turn) ; started = st.started ; stage = st.stage ; 
+
+        (**reassign previous move to bet **)
+        previous_move = [Bet amt]
+      } 
 
     else failwith "Not enough cash"
 
@@ -319,7 +332,10 @@ let bet st amt =
            check or re-raise action **)
         previous_bet = amt ;
 
-        turn = -(st.turn) ; started = st.started ; stage = st.stage} 
+        turn = -(st.turn) ; started = st.started ; stage = st.stage ; 
+
+        previous_move = [Bet amt]
+      } 
 
     else failwith "Not enough cash"
 
@@ -356,7 +372,12 @@ let raise st amt =
       previous_bet = amt ;
 
       (**alternate turn, starting stays same **)
-      turn = -(st.turn) ; started = st.started ; stage = st.stage} 
+      turn = -(st.turn) ; started = st.started ; stage = st.stage ;
+
+      (**reassign previous move to Raise amt **)
+      previous_move = [Raise amt]
+
+    } 
   | -1 -> 
 
     (**Check if player1 has enough cash2 to raise the previous_bet**)
@@ -377,7 +398,14 @@ let raise st amt =
       previous_bet = amt ;
 
       (**alternate turn, starting stays same **)
-      turn = -(st.turn) ; started = st.started ; stage = st.stage} 
+      turn = -(st.turn) ; started = st.started ; stage = st.stage ;
+
+      (**reassign previous move to Raise amt **)
+      previous_move = [Raise amt]
+
+    } 
+
+
 
   | _ -> failwith "Invalid Command"
 
@@ -411,7 +439,11 @@ let call st =
       previous_bet = 0 ;
 
       (**alternate turn, starting stays same **)
-      turn = -(st.turn) ; started = st.started ; stage = st.stage} 
+      turn = -(st.turn) ; started = st.started ; stage = st.stage ;
+
+      (**reassign previous move to Call **)
+      previous_move = [Call]
+    } 
   | -1 -> 
 
     (**failsafe to check if player1 has enough cash1 to call the previous_bet **)
@@ -432,7 +464,11 @@ let call st =
       previous_bet = 0 ;
 
       (**alternate turn, starting stays same **)
-      turn = -(st.turn) ; started = st.started ; stage = st.stage} 
+      turn = -(st.turn) ; started = st.started ; stage = st.stage ;
+
+      (**reassign previous move to Call **)
+      previous_move = [Call]
+    } 
 
   | _ -> failwith "Invalid Command"
 
@@ -443,12 +479,50 @@ let check st =
     table = st.table ; cards = st.cards ; cash1 = st.cash1 ; 
     cash2 = st.cash2 ; pot = st.pot
   ; ante = st.ante ; previous_bet = 0 ; turn = -(st.turn)
-  ; started = st.started ; stage = st.stage} 
+  ; started = st.started ; stage = st.stage;
+
+    (*reassign previous_move to Check*)
+    previous_move = [Check]
+  } 
 
 (**END OF TURN BASED FUNCTIONS **)
 
 
+(**Helper FUnction for Mail to determine if time to update new cards **)
 
+
+(**input a state and outputs either
+   [new state] with updated cards from flop, deal, turn, river, or returns 
+   original state signifying it is not time for new cards**)
+let new_cards st cmd = 
+
+  match cmd with 
+
+  (*If the action is Call, then automatically move to check which updated state 
+    to return**)
+  | Call -> (
+      match st.stage with 
+      | 1 -> flop st
+      | 2 -> turn st 
+      | 3 -> river st
+      | 4 -> winner st
+      | _ -> st
+    )
+
+  (**If action is Check, then checks to see if previous move was also Check, if
+     not then returns original state, if it is then return updated state **)
+  | Check when st.previous_move = [Check] -> (
+      match st.stage with 
+      | 1 -> flop st
+      | 2 -> turn st 
+      | 3 -> river st
+      | 4 -> winner st
+      | _ -> st
+    )
+
+  (**All other actions will not trigger a new set of cards, so return original 
+     state **)
+  | _ -> st
 
 
 
