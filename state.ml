@@ -74,24 +74,6 @@ type t = { hand1 : hand1 ; hand2 : hand2 ;
          ; started : started ; stage : stage ; previous_move : previous_move} 
 
 
-(**initializes type state, always called when starting new hand therefore the 
-   only information passing from one round to another is the amount of
-   cash each player has left and their ante**)
-
-(**started is whoever started prior, from main access this as State.started 
-   where you pull out who started on prior hand, and state_init will flip that **)
-let init_state cash1 cash2 ante started = 
-
-  let cards = Poker.shuffle (Poker.full_deck) (Array.of_list ([])) in 
-
-  (**state is initialized but cards are assigned to random array list of 9 
-     cards called from Poker.shuffle **)
-  { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
-    table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
-    cash2 = cash2 ; pot = 0 ; ante = ante ; previous_bet = 0 ; turn = started
-  ; started = started ; stage = 0 ; previous_move = []} 
-
-
 (**returns player 1 hand **)
 let hand1 st = 
   st.hand1
@@ -182,6 +164,20 @@ let deal st =
     previous_move = []
   }
 
+(**initializes type state, always called when starting new hand therefore the 
+   only information passing from one round to another is the amount of
+   cash each player has left and their ante**)
+let init_state cash1 cash2 ante started = 
+
+  let cards = Poker.shuffle (Poker.full_deck) (Array.of_list ([])) in 
+
+  (**state is initialized but cards are assigned to random array list of 9 
+     cards called from Poker.shuffle **)
+  deal { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
+         table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
+         cash2 = cash2 ; pot = 0 ; ante = ante ; previous_bet = 0 ; turn = started
+       ; started = started ; stage = 0 ; previous_move = []} 
+
 let flop st = 
   (**have assert statement to confirm length of array st.cards is 5 if fails
      then this action of flop is not possible **)
@@ -247,12 +243,12 @@ let winner st =
 
   (**if player 1 wins then reassign pots and reset game accordingly **)
   |"player 1" -> 
-
+    print_string "Player 1 wins with "; print_string (format_lst (Array.to_list st.hand1)); print_endline ". Dealing next hand now.";
     init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
 
   (**if player 2 wins then reassign pots and reset game accordingly **)
   |"player 2" ->
-
+    print_string "Player 2 wins with "; print_string (format_lst (Array.to_list st.hand2)); print_endline ". Dealing next hand now.";
     init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
 
   (**if players tie then reassign pots and reset game accordingly **)
@@ -269,21 +265,21 @@ let winner st =
 
 (*BEGINNING OF TURN BASED FUNCTIONS **)
 
-
 (**takes state and just creates a new initialized state with empty hands and 
    the pot distributed to winner, fold dependent on player turn**)
 let fold st = 
-
+  match st.turn with 
   (**check who folds dependent on that is who you change the pot value **)
-  if (st.turn = 1) 
+  |1 -> print_endline "Player 1 folds, player 2 wins. Dealing new hand now."; init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
+  |(-1) -> print_endline "Player 2 folds, player 1 wins. Dealing new hand now."; init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
+  |_ -> failwith "Impossible"
+(**if player 1 turn, then intialize new hand with player 1 cash
+   (* same and player 2 gaining pot value **)
+   then init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
 
-  (**if player 1 turn, then intialize new hand with player 1 cash
-     same and player 2 gaining pot value **)
-  then init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
-
-  (**if player 2 turn, then initialize new hand with player 2 cash same
-     and player 1 gaining pot value **)
-  else init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
+   (**if player 2 turn, then initialize new hand with player 2 cash same
+   and player 1 gaining pot value **)
+   else init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started)) *)
 
 
 (**takes in state and an amount and bets it dependent on player turn **)
@@ -349,7 +345,7 @@ let raise st amt =
   assert (st.previous_bet > 0);
 
   (**checks to see if raise amount is atleast twice the previous bet **)
-  assert (amt > 2*st.previous_bet);
+  assert (amt >= 2*st.previous_bet);
 
   match st.turn with 
   | 1 -> 
@@ -509,9 +505,10 @@ let new_cards st cmd =
       | _ -> st
     )
 
+
   (**If action is Check, then checks to see if previous move was also Check, if
      not then returns original state, if it is then return updated state **)
-  | Check when st.previous_move = [Check] -> (
+  | Check -> if st.previous_move <> [Check] then check st else (
       match st.stage with 
       | 1 -> flop st
       | 2 -> turn st 

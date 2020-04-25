@@ -1,4 +1,3 @@
-open Poker 
 
 type move_phrase = string list
 
@@ -18,6 +17,7 @@ type move =
   |Cards2
   |Cash1
   |Cash2
+  |Pot
   |Help
   |Quit
   |Loop
@@ -81,6 +81,7 @@ let parse str =
     |"buy", "in"::[] -> Buy_in (-1)
     |"buy", "in"::[amount] -> Buy_in (remove_dsign amount)
     |"help", [] -> Help
+    |"pot", [] -> Pot
     |"p1", [x] -> if x = "cards" then Cards1 
       else if x = "cash" then Cash1
       else raise(Invalid_move)
