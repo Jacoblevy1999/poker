@@ -125,11 +125,12 @@ let best_straight (c) (acc)=
   let rec straight_sorter lst acc = 
     match lst with
     |[] -> if List.length acc >= 5 then (Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 5))
-      else if List.length acc = 4 && fst (List.hd acc) = 0 && List.mem 12 (values_in_hand c)then 
+      else if List.length acc = 4 && List.mem 0 (values_in_hand acc) && List.mem 12 (values_in_hand c) then 
         (List.hd (add_all_value 12 c []))::(Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 4))
       else []
     |(k,v)::t -> if acc = [] then straight_sorter t [(k,v)] else
-      if k = 1+(fst (List.hd acc)) then straight_sorter t ((k,v)::acc) else straight_sorter t [(k,v)]
+      if k = 1+(fst (List.hd acc)) then straight_sorter t ((k,v)::acc) else 
+      if (List.length acc) >= 4 then straight_sorter [] acc else straight_sorter t [(k,v)]
   in straight_sorter (List.rev (List.sort_uniq helper_comp c)) []
 
 let best_straight_flush c = 

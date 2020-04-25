@@ -253,6 +253,7 @@ let winner st =
 
   (**if players tie then reassign pots and reset game accordingly **)
   |"tie" ->
+    print_string "Both players tied, dealing next hand now.";
     let payout = (st.pot/2) in
 
     init_state (st.cash1 + payout) (st.cash2 + payout) (st.ante) (-(st.started))
