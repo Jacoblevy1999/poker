@@ -45,16 +45,27 @@ let rec loop state : unit =
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Loop -> loop state
 
-let play_game =
-  print_endline "How much money is each player gambling with? 
-    Type an amount between $10 and $100000 and then hit enter.";
+let rec set_buy_in str = 
+  print_endline "Type an amount between $10 and $1000000 and then hit enter.";
   print_string  "> ";
   let buy_in_str = read_line () in 
-  let buy_in_int = remove_dsign buy_in_str in 
-  print_endline "How much is the ante? Enter an amount between $1 and $1000.";
-  print_string "> ";
+  let buy_int_int = remove_dsign buy_in_str in
+  if buy_int_int > 9 && buy_int_int < 1000001 then buy_int_int 
+  else set_buy_in ""
+
+let rec set_ante str = 
+  print_endline "Type an amount between $1 and $1000 and then hit enter.";
+  print_string  "> ";
   let ante_str = read_line () in 
-  let ante_int = remove_dsign ante_str in 
+  let ante_int = remove_dsign ante_str in
+  if ante_int > 0 && ante_int < 1001 then ante_int
+  else set_ante ""
+
+let play_game =
+  print_endline "How much money is each player gambling with?"; 
+  let buy_in_int = set_buy_in "" in
+  print_endline "How much is the ante?";
+  let ante_int = set_ante "" in
   let init = State.init_state buy_in_int buy_in_int ante_int 1 in 
   print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
   print_endline "To check, type 'check'.";
