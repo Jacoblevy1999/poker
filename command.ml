@@ -60,7 +60,7 @@ let rec is_phrase_wellformed strlst =
     by an integer and returns the integer as type int. 
     Example: [remove_dsign "$25"] returns [25]. *)
 let remove_dsign str = 
-  try int_of_string str with (Failure "") -> 
+  try int_of_string str with (Failure "int_of_string") -> 
     let list = String.split_on_char '$' str in 
     match list with 
     |""::[t] -> int_of_string t 
