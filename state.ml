@@ -494,15 +494,18 @@ let call st =
 (**check does not change anything, just moves the turn counter **)
 let check st = 
 
-  { hand1 = st.hand1 ; hand2 = st.hand2 ; 
-    table = st.table ; cards = st.cards ; cash1 = st.cash1 ; 
-    cash2 = st.cash2 ; pot = st.pot
-  ; ante = st.ante ; previous_bet = 0 ; turn = -(st.turn)
-  ; started = st.started ; stage = st.stage;
+  if (st.previous_bet > 0) then ((print_endline "Must call, raise, or fold") ; st)
+  else
 
-    (*reassign previous_move to Check*)
-    previous_move = [Check]
-  } 
+    { hand1 = st.hand1 ; hand2 = st.hand2 ; 
+      table = st.table ; cards = st.cards ; cash1 = st.cash1 ; 
+      cash2 = st.cash2 ; pot = st.pot
+    ; ante = st.ante ; previous_bet = 0 ; turn = -(st.turn)
+    ; started = st.started ; stage = st.stage;
+
+      (*reassign previous_move to Check*)
+      previous_move = [Check]
+    } 
 
 (**END OF TURN BASED FUNCTIONS **)
 
