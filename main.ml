@@ -11,7 +11,7 @@ let rec loop state : unit =
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
   match command with
-  |Call -> loop (new_cards (call state) Call)
+  |Call -> loop (new_cards (state) Call)
   |Check -> loop (new_cards state Check)
   |Fold -> loop (fold state)
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
