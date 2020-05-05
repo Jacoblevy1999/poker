@@ -105,9 +105,9 @@ let current_hand st =
   | -1 -> st.hand2
   | _ -> failwith "Not possible"
 
-(**BEGINNING OF NON TURN BASED STATE FUNCTIONS ex deal, flop, turn river 
-   winner **)
 
+(**BEGINNING OF NON TURN BASED STATE FUNCTIONS ex deal, flop, turn river 
+   winner, buyin **)
 
 (**deals 2 cards to each player by taking off first 4 elements of 
    array st.cards, then auto bets the ante of each player.  **)
@@ -118,10 +118,12 @@ let deal st =
 
     (**both players must have more cash than the ante before dealing, otherwise
        you cannot deal and player must buy in for more **)
-  if (st.cash1 < st.ante) 
-  then ((print_endline "Player 1 does not have enough to pay the ante"); st)
+  if ((st.cash1 < st.ante) && (st.cash2 < st.ante)) 
+  then ((print_endline "Player 1 and Player 2 does not have enough to pay the ante, please buy in for more"); st)
+  else if (st.cash1 < st.ante) 
+  then ((print_endline "Player 1 does not have enough to pay the ante, please buy in for more"); st)
   else if (st.cash2 < st.ante) 
-  then ((print_endline "Player 2 does not have enough to pay the ante"); st)
+  then ((print_endline "Player 2 does not have enough to pay the ante please buy in for more"); st)
   else 
 
     let hand1 = snd (Poker.deal (st.cards) (Array.of_list ([]))) in 
@@ -268,6 +270,28 @@ let winner st =
       init_state (st.cash1 + payout) (st.cash2 + payout) (st.ante) (-(st.started))
 
     | _ -> failwith "Not Possible"
+
+
+(**allows player 1 or player 2 to buy in for [amt] int, amt will be
+   added to st.cash1 or st.cash2 depending on whose turn [st.turn] **)
+let buyin st amt = 
+
+  (**check that amt > 0 in buy-in **)
+  if (amt <= 0) then ((print_endline "Must buy in for more than $0" ; st)) else 
+
+    match st.turn with
+    | 1 -> { hand1 = st.hand1 ; hand2 = st.hand2 ; 
+             table = st.table ; cards = st.cards ; cash1 = st.cash1 + amt; 
+             cash2 = st.cash2 ; pot = st.pot
+           ; ante = st.ante ; previous_bet = st.previous_bet ; turn = st.turn
+           ; started = st.started ; stage = st.stage ; previous_move = st.previous_move} 
+    | -1 -> 
+      { hand1 = st.hand1 ; hand2 = st.hand2 ; 
+        table = st.table ; cards = st.cards ; cash1 = st.cash1; 
+        cash2 = st.cash2 + amt ; pot = st.pot
+      ; ante = st.ante ; previous_bet = st.previous_bet ; turn = st.turn
+      ; started = st.started ; stage = st.stage ; previous_move = st.previous_move} 
+    | _ -> failwith "Impossible"
 
 
 (**END OF NON TURN BASED FUNCTIONS **)
@@ -475,8 +499,8 @@ let call st =
 
 
           (**if player1 turn then previous_bet amount subtracted from cash1 **)
-          cash1 = (st.cash1 - st.previous_bet) ; 
-          cash2 = st.cash2 ; pot = (st.pot + st.previous_bet) ; ante = st.ante ; 
+          cash1 = (st.cash1) ; 
+          cash2 = st.cash2 - st.previous_bet ; pot = (st.pot + st.previous_bet) ; ante = st.ante ; 
 
           (**assign previous bet to amt value to track in case of following
              check or re-raise action **)
@@ -524,11 +548,11 @@ let new_cards st cmd =
     to return**)
   | Call -> if st.previous_bet <= 0 then call st else (
       match st.stage with 
-      | 1 -> flop st
-      | 2 -> turn st 
-      | 3 -> river st
-      | 4 -> winner st
-      | _ -> st
+      | 1 -> flop (call st)
+      | 2 -> turn (call st)
+      | 3 -> river (call st)
+      | 4 -> winner (call st)
+      | _ -> (call st)
     )
 
 
