@@ -11,7 +11,7 @@ let rec loop state : unit =
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
   match command with
-  |Call -> loop (new_cards (call state) Call)
+  |Call -> loop (new_cards (state) Call)
   |Check -> loop (new_cards state Check)
   |Fold -> loop (fold state)
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
@@ -27,7 +27,7 @@ let rec loop state : unit =
       else  (print_endline "How much do you want to buy in?"); loop state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
-    print_endline "To raise a bet, type 'raise [amount]', i.e. 'riase $30' will raise the bet by $30.";
+    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet by $30.";
     print_endline "To call, type 'call'.";
     print_endline "To fold, type 'fold'.";
     print_endline "To see player 1's cards, enter 'p1 cards'";
