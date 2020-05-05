@@ -16,14 +16,7 @@ let rec loop state : unit =
   |Fold -> loop (fold state)
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
   |Raise amount -> if amount<>(-1) then loop (raise state amount) else (print_endline "How much do you want to raise?"); loop state
-  |Buy_in amount -> if amount<>(-1) then if state.turn = 1 then loop ({ hand1 = state.hand1; hand2 = state.hand2; 
-                                                                        table = state.table ; cards = state.cards ; cash1 = (state.cash1 + amount) ; 
-                                                                        cash2 = state.cash2 ; pot = state.pot ; ante = state.ante ; previous_bet = 0 ; turn = state.started
-                                                                      ; started = state.started ; stage = 0; previous_move = state.previous_move}) 
-      else if state.turn = -1 then loop ({ hand1 = state.hand1; hand2 = state.hand2; 
-                                           table = state.table ; cards = state.cards ; cash1 = state.cash1 ; 
-                                           cash2 = (state.cash2 + amount) ; pot = state.pot ; ante = state.ante ; previous_bet = 0 ; turn = state.started
-                                         ; started = state.started ; stage = 0; previous_move = state.previous_move})
+  |Buy_in amount -> if amount<>(-1) then loop (buyin state amount)
       else  (print_endline "How much do you want to buy in?"); loop state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
