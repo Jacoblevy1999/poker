@@ -42,19 +42,21 @@ let rec set_buy_in str =
   print_endline "Type an amount between $10 and $1000000 and then hit enter.";
   print_string  "> ";
   let buy_in_str = read_line () in 
-  let buy_int_int = remove_dsign buy_in_str in
-  if buy_int_int = (-1) then set_buy_in "" else 
-  if buy_int_int > 9 && buy_int_int < 1000001 then buy_int_int 
-  else set_buy_in ""
+  if buy_in_str = "quit" then begin print_endline "Thanks for playing!" ; exit 0 end
+  else let buy_int_int = remove_dsign buy_in_str in
+    if buy_int_int = (-1) then set_buy_in "" else 
+    if buy_int_int > 9 && buy_int_int < 1000001 then buy_int_int 
+    else set_buy_in ""
 
 let rec set_ante str = 
   print_endline "Type an amount between $1 and $1000 and then hit enter.";
   print_string  "> ";
   let ante_str = read_line () in 
-  let ante_int = remove_dsign ante_str in
-  if ante_int = (-1) then set_ante "" else 
-  if ante_int > 0 && ante_int < 1001 then ante_int
-  else set_ante ""
+  if ante_str = "quit" then begin print_endline "Thanks for playing!" ; exit 0 end
+  else let ante_int = remove_dsign ante_str in
+    if ante_int = (-1) then set_ante "" else 
+    if ante_int > 0 && ante_int < 1001 then ante_int
+    else set_ante ""
 
 let play_game =
   print_endline
