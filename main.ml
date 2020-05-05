@@ -30,8 +30,8 @@ let rec loop state : unit =
     print_endline "To quit, type 'quit'.";
     print_endline "To see this list of commands again, type 'help'.";
     loop state
-  |Cards1 -> print_endline (Array.to_list (state.hand1) |> format_lst); loop state
-  |Cards2 -> print_endline (Array.to_list (state.hand2) |> format_lst); loop state
+  |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; (loop state);) else print_endline (Array.to_list (state.hand1) |> format_lst); loop state
+  |Cards2 -> if state.turn <> -1 then (print_endline "You can't look at player 2's cards!"; (loop state);) else print_endline (Array.to_list (state.hand2) |> format_lst); loop state
   |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); loop state
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop state
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop state
