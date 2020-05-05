@@ -1,18 +1,4 @@
 type card = (int * string)
-
-type besthand = 
-  |RoyalFlush
-  |StraightFlush of int
-  |FourOfKind of int
-  |FullHouse of int * int
-  |Flush of int *  int * int * int * int
-  |Straight of int
-  |ThreeOfKind of int
-  |TwoPair of int * int * int
-  |Pair of int * int * int * int
-  |HighCard of int *  int * int * int * int
-
-
 type deck = card array
 type hand = card array
 type table = card array
