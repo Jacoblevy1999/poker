@@ -256,29 +256,37 @@ let rec format_lst c =
         (val_dict.(k))^" clubs, "^(w_commas t) in
   String.sub (w_commas c) 0 (String.length (w_commas c)-2)
 
-let input = Array.of_list [("3", "H"); ("A", "S"); ("2", "D"); ("5", "S"); ("J", "H")] 
-let pp2 c = 
+
+let hand_to_input hand = 
+  let rec aux hand acc =
+    match hand with 
+    |[] -> Array.of_list acc
+    |(k,v)::t -> aux t ((val_dict1.(k),(String.capitalize_ascii v))::acc)
+  in aux hand []
+
+
+let pp2 input = 
   "         ___    ___
         |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  
         |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|
         |___|  |___|
         "
 
-let pp3 c = 
+let pp3 input = 
   "         ___    ___    ___
         |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |
         |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|
         |___|  |___|  |___|
         "
 
-let pp4 c =
+let pp4 input =
   "         ___    ___    ___
         |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(2))^"  |
         |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(2))^"|
         |___|  |___|  |___|  |___|
         "
 
-let pp5 c = 
+let pp5 input = 
   "         ___    ___    ___    ___    ___
         |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |  |"^(fst input.(4))^"  |
         |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|  |  "^(snd input.(4))^"|
