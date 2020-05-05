@@ -11,7 +11,7 @@ let rec loop state : unit =
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
   match command with
-  |Call -> loop (new_cards (state) Call)
+  |Call -> loop (new_cards (call state) Call)
   |Check -> loop (new_cards state Check)
   |Fold -> loop (fold state)
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
@@ -27,7 +27,7 @@ let rec loop state : unit =
       else  (print_endline "How much do you want to buy in?"); loop state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
-    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet by $30.";
+    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
     print_endline "To call, type 'call'.";
     print_endline "To fold, type 'fold'.";
     print_endline "To see player 1's cards, enter 'p1 cards'";
@@ -50,6 +50,7 @@ let rec set_buy_in str =
   print_string  "> ";
   let buy_in_str = read_line () in 
   let buy_int_int = remove_dsign buy_in_str in
+  if buy_int_int = (-1) then set_buy_in "" else 
   if buy_int_int > 9 && buy_int_int < 1000001 then buy_int_int 
   else set_buy_in ""
 
@@ -58,10 +59,14 @@ let rec set_ante str =
   print_string  "> ";
   let ante_str = read_line () in 
   let ante_int = remove_dsign ante_str in
+  if ante_int = (-1) then set_ante "" else 
   if ante_int > 0 && ante_int < 1001 then ante_int
   else set_ante ""
 
 let play_game =
+  print_endline
+    "\n\nWelcome, are you ready to take a seat at the table and 
+  play heads up poker?\n";
   print_endline "How much money is each player gambling with?"; 
   let buy_in_int = set_buy_in "" in
   print_endline "How much is the ante?";

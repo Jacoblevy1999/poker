@@ -63,7 +63,7 @@ let remove_dsign str =
   let list = String.split_on_char '$' str in 
   match list with 
   |""::[t] -> int_of_string t 
-  |_ -> failwith "Not the right form"
+  |_ -> -1
 
 let parse str = 
   let move = str_to_strlst str in
@@ -90,5 +90,8 @@ let parse str =
       else raise(Invalid_move)
     |_, _ -> raise(Invalid_move)
 
-
+let x = "         ___
+        |4  |
+        |  H|
+        |___|"
 

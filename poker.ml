@@ -258,7 +258,10 @@ let fs2 = snd h2
 let val_dict  = Array.of_list ["two of";"three of";"four of";"five of";"six of";"seven of";
                                "eight of";"nine of";"ten of";"jack of";"queen of";"king of";"ace of"]
 
-let rec format_lst c= 
+let val_dict1 = Array.of_list ["2";"3";"4";"5";"6";"7";
+                               "8";"9";"10";"J";"Q";"K";"A"]
+
+let rec format_lst c = 
   let rec w_commas = function
     |[] -> ""
     |(k,v)::t -> if v = "h" then (val_dict.(k))^" hearts, "^(w_commas t) else
@@ -266,4 +269,75 @@ let rec format_lst c=
       if v = "s" then (val_dict.(k))^" spades, "^(w_commas t) else
         (val_dict.(k))^" clubs, "^(w_commas t) in
   String.sub (w_commas c) 0 (String.length (w_commas c)-2)
+
+let input = Array.of_list [("3", "H"); ("A", "S"); ("2", "D"); ("5", "S"); ("J", "H")] 
+let pp2 c = 
+  "         ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|
+        |___|  |___|
+        "
+
+let pp3 c = 
+  "         ___    ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|
+        |___|  |___|  |___|
+        "
+
+let pp4 c =
+  "         ___    ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(2))^"  |
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(2))^"|
+        |___|  |___|  |___|  |___|
+        "
+
+let pp5 c = 
+  "         ___    ___    ___    ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |  |"^(fst input.(4))^"  |
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|  |  "^(snd input.(4))^"|
+        |___|  |___|  |___|  |___|  |___|
+        "
+
+let pp c = 
+  let rec aux (acc:string list) c = 
+    if List.length c = 0 then List.rev acc else
+      match c with
+      |[] -> ""::acc
+      |(k,v)::t -> 
+        if v = "h" then (aux (("          ___
+         |"^val_dict1.(k)^"  |
+         |  H|
+         |___|")::acc) t) else
+        if v = "d" then (aux (("          ___
+         |"^val_dict1.(k)^"  |
+         |  D|
+         |___|")::acc) t) else
+        if v = "s" then (aux (("          ___
+         |"^val_dict1.(k)^"  |
+         |  H|
+         |___|")::acc) t) else (aux
+                                  (("          ___
+         |"^val_dict1.(k)^"  |
+         |  H|
+         |___|")::acc) t) in
+  aux [] c
+
+let rec print_lst = function 
+  |[] -> print_string ""
+  |h::t -> print_string h; print_lst t
+
+let pplist = [("two of hearts, "); ("three of hearts, "); "four of hearts "; "five of hearts, ";
+              "six of hearts, "; "seven of hearts, "; "eight of hearts, "; "nine of hearts, "; "ten of hearts, ";
+              "jack of hearts, "; "queen of hearts, "; "king of hearts, "; "ace of hearts, ";
+              ("two of spades, "); ("three of spades, "); "four of spades "; "five of hearts, ";
+              "six of hearts, "; "seven of hearts, "; "eight of hearts, "; "nine of hearts, "; "ten of hearts, ";
+              "jack of hearts, "; "queen of hearts, "; "king of hearts, "; "ace of hearts, "; 
+              ("two of hearts, "); ("three of hearts, "); "four of hearts "; "five of hearts, ";
+              "six of hearts, "; "seven of hearts, "; "eight of hearts, "; "nine of hearts, "; "ten of hearts, ";
+              "jack of hearts, "; "queen of hearts, "; "king of hearts, "; "ace of hearts, "; 
+              ("two of hearts, "); ("three of hearts, "); "four of hearts "; "five of hearts, ";
+              "six of hearts, "; "seven of hearts, "; "eight of hearts, "; "nine of hearts, "; "ten of hearts, ";
+              "jack of hearts, "; "queen of hearts, "; "king of hearts, "; "ace of hearts, "]
+
 
