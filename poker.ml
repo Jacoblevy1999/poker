@@ -299,45 +299,9 @@ let pp5 c =
         |___|  |___|  |___|  |___|  |___|
         "
 
-let pp c = 
-  let rec aux (acc:string list) c = 
-    if List.length c = 0 then List.rev acc else
-      match c with
-      |[] -> ""::acc
-      |(k,v)::t -> 
-        if v = "h" then (aux (("          ___
-         |"^val_dict1.(k)^"  |
-         |  H|
-         |___|")::acc) t) else
-        if v = "d" then (aux (("          ___
-         |"^val_dict1.(k)^"  |
-         |  D|
-         |___|")::acc) t) else
-        if v = "s" then (aux (("          ___
-         |"^val_dict1.(k)^"  |
-         |  H|
-         |___|")::acc) t) else (aux
-                                  (("          ___
-         |"^val_dict1.(k)^"  |
-         |  H|
-         |___|")::acc) t) in
-  aux [] c
 
-let rec print_lst = function 
-  |[] -> print_string ""
-  |h::t -> print_string h; print_lst t
 
-let pplist = [("two of hearts, "); ("three of hearts, "); "four of hearts "; "five of hearts, ";
-              "six of hearts, "; "seven of hearts, "; "eight of hearts, "; "nine of hearts, "; "ten of hearts, ";
-              "jack of hearts, "; "queen of hearts, "; "king of hearts, "; "ace of hearts, ";
-              ("two of spades, "); ("three of spades, "); "four of spades "; "five of hearts, ";
-              "six of hearts, "; "seven of hearts, "; "eight of hearts, "; "nine of hearts, "; "ten of hearts, ";
-              "jack of hearts, "; "queen of hearts, "; "king of hearts, "; "ace of hearts, "; 
-              ("two of hearts, "); ("three of hearts, "); "four of hearts "; "five of hearts, ";
-              "six of hearts, "; "seven of hearts, "; "eight of hearts, "; "nine of hearts, "; "ten of hearts, ";
-              "jack of hearts, "; "queen of hearts, "; "king of hearts, "; "ace of hearts, "; 
-              ("two of hearts, "); ("three of hearts, "); "four of hearts "; "five of hearts, ";
-              "six of hearts, "; "seven of hearts, "; "eight of hearts, "; "nine of hearts, "; "ten of hearts, ";
-              "jack of hearts, "; "queen of hearts, "; "king of hearts, "; "ace of hearts, "]
+
+
 
 

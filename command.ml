@@ -90,8 +90,4 @@ let parse str =
       else raise(Invalid_move)
     |_, _ -> raise(Invalid_move)
 
-let x = "         ___
-        |4  |
-        |  H|
-        |___|"
 

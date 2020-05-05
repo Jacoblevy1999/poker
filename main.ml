@@ -17,7 +17,7 @@ let rec loop state : unit =
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
   |Raise amount -> if amount<>(-1) then loop (raise state amount) else (print_endline "How much do you want to raise?"); loop state
   |Buy_in amount -> if amount<>(-1) then loop (buyin state amount)
-      else  (print_endline "How much do you want to buy in?"); loop state
+    else  (print_endline "How much do you want to buy in?"); loop state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
     print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
