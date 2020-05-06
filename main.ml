@@ -13,8 +13,8 @@ let whose_turn state =
    check, once that is done it is switched to deal state and hand begins **)
 let rec predeal state acc = 
   (match state.turn with 
-   | 1 -> print_endline ("\nPlayer 1 currently has $" ^ string_of_int state.cash1 ^ ". You may now [buy in] for more, or [quit] the game. To begin the hand, type [deal].\n")
-   | _ -> print_endline ("\nPlayer 2 currently has $" ^ string_of_int state.cash2 ^ ". You may now [buy in] for more, or [quit] the game. To begin the hand, type [deal].\n")
+   | 1 -> print_endline ("\nPlayer 1 currently has $" ^ string_of_int state.cash1 ^ ". You may now [buy in] for more, or [quit] the game. If Player 1 is ready to begin the hand, type [deal].\n")
+   | _ -> print_endline ("\nPlayer 2 currently has $" ^ string_of_int state.cash2 ^ ". You may now [buy in] for more, or [quit] the game. If Player 2 is ready to begin the hand, type [deal].\n")
   );
   whose_turn state;
 
@@ -103,8 +103,8 @@ let rec loop state : unit =
   |Fold -> print_endline ""; loop (fold state)
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
   |Raise amount -> if amount<>(-1) then loop (raise state amount) else (print_endline "How much do you want to raise?"); loop state
-  |Buy_in amount -> if amount<>(-1) then loop (buyin state amount)
-    else  (print_endline "How much do you want to buy in?"); loop state
+  |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop (buyin state amount)
+                                                else  (print_endline "How much do you want to buy in?"); loop state) else print_endline "You must finish this hand before buying in for more" ; loop state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
     print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
