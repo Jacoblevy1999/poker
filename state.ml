@@ -113,18 +113,11 @@ let current_hand st =
    array st.cards, then auto bets the ante of each player.  **)
 let deal st = 
 
+  print_endline "\nDealing hands now \n";
+
   if (Array.length st.cards <> 9) then ((print_endline "Dealing not possible"); st)
   else 
 
-    (**both players must have more cash than the ante before dealing, otherwise
-       you cannot deal and player must buy in for more **)
-  if ((st.cash1 < st.ante) && (st.cash2 < st.ante)) 
-  then ((print_endline "Player 1 and Player 2 does not have enough to pay the ante, please buy in for more"); st)
-  else if (st.cash1 < st.ante) 
-  then ((print_endline "Player 1 does not have enough to pay the ante, please buy in for more"); st)
-  else if (st.cash2 < st.ante) 
-  then ((print_endline "Player 2 does not have enough to pay the ante please buy in for more"); st)
-  else 
 
     let hand1 = snd (Poker.deal (st.cards) (Array.of_list ([]))) in 
     let remaining1 = fst (Poker.deal (st.cards) (Array.of_list ([]))) in 
@@ -180,10 +173,10 @@ let init_state cash1 cash2 ante started =
 
   (**state is initialized but cards are assigned to random array list of 9 
      cards called from Poker.shuffle **)
-  deal { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
-         table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
-         cash2 = cash2 ; pot = 0 ; ante = ante ; previous_bet = 0 ; turn = started
-       ; started = started ; stage = 0 ; previous_move = []} 
+  { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
+    table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
+    cash2 = cash2 ; pot = 0 ; ante = ante ; previous_bet = 0 ; turn = started
+  ; started = started ; stage = 0 ; previous_move = []} 
 
 let flop st = 
   (**have assert statement to confirm length of array st.cards is 5 if fails
@@ -254,17 +247,17 @@ let winner st =
 
     (**if player 1 wins then reassign pots and reset game accordingly **)
     |"player 1" -> 
-      print_string "Player 1 wins with "; print_string (format_lst (Array.to_list st.hand1)); print_endline ". Dealing next hand now.";
+      print_string "Player 1 wins with "; print_string (format_lst (Array.to_list st.hand1)); 
       init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
 
     (**if player 2 wins then reassign pots and reset game accordingly **)
     |"player 2" ->
-      print_string "Player 2 wins with "; print_string (format_lst (Array.to_list st.hand2)); print_endline ". Dealing next hand now.";
+      print_string "Player 2 wins with "; print_string (format_lst (Array.to_list st.hand2)); 
       init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
 
     (**if players tie then reassign pots and reset game accordingly **)
     |"tie" ->
-      print_string "Both players tied, dealing next hand now.";
+      print_string "Both players tied. Player 1 had"; print_string (format_lst (Array.to_list st.hand1)); print_endline "Player 2 had" ; print_string (format_lst (Array.to_list st.hand2)); 
       let payout = (st.pot/2) in
 
       init_state (st.cash1 + payout) (st.cash2 + payout) (st.ante) (-(st.started))
