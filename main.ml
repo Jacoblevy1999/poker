@@ -128,6 +128,7 @@ let rec loop state : unit =
     else if state.stage = 2 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp3)); loop state)
     else if state.stage = 3 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp4)); loop state)
     else if state.stage = 4 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp5)); loop state)
+  |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop state
   |Loop -> loop state
 
 let rec set_buy_in str = 
