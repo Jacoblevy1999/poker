@@ -91,10 +91,10 @@ let rec loop state : unit =
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop state
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Clear -> let _ = Sys.command("clear") in 
-    if state.stage = 0 || state.stage = 1 then (print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; loop state)
-    else if state.stage = 2 then (print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp3)); loop state)
-    else if state.stage = 3 then (print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp4)); loop state)
-    else if state.stage = 4 then (print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|"; print_endline "|";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp5)); loop state)
+    if state.stage = 0 || state.stage = 1 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; loop state)
+    else if state.stage = 2 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp3)); loop state)
+    else if state.stage = 3 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp4)); loop state)
+    else if state.stage = 4 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp5)); loop state)
   |Loop -> loop state
 
 let rec set_buy_in str = 
