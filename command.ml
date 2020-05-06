@@ -20,6 +20,7 @@ type move =
   |Pot
   |Help
   |Quit
+  |Clear
   |Loop
 
 
@@ -83,6 +84,7 @@ let parse str =
     |"buy", "in"::[amount] -> Buy_in (remove_dsign amount)
     |"help", [] -> Help
     |"pot", [] -> Pot
+    |"clear", [] -> Clear 
     |"p1", [x] -> if x = "cards" then Cards1 
       else if x = "cash" then Cash1
       else raise(Invalid_move)

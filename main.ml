@@ -2,6 +2,8 @@ open Poker
 open State 
 open Command
 
+
+
 let whose_turn state = 
   if state.turn = 1 then print_string "It is player 1's turn. > "
   else print_string "It is player 2's turn. > "
@@ -82,12 +84,13 @@ let rec loop state : unit =
     print_endline "To quit, type 'quit'.";
     print_endline "To see this list of commands again, type 'help'.";
     loop state
-  |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; (loop state);) else print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); loop state
-  |Cards2 -> if state.turn <> -1 then (print_endline "You can't look at player 2's cards!"; (loop state);) else print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); loop state
+  |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; (loop state);) else print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop state
+  |Cards2 -> if state.turn <> -1 then (print_endline "You can't look at player 2's cards!"; (loop state);) else print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop state
   |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); loop state
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop state
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop state
   |Quit -> print_endline "Thanks for playing!" ; exit 0
+  |Clear -> let _ = Sys.command("clear") in loop state 
   |Loop -> loop state
 
 let rec set_buy_in str = 
