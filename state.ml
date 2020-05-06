@@ -105,6 +105,17 @@ let current_hand st =
   | -1 -> st.hand2
   | _ -> failwith "Not possible"
 
+(**sets stage to specific value **)
+let set_stage st amt = 
+  { hand1 = st.hand1 ; hand2 = st.hand2 ; 
+    table = st.table ; cards = st.cards ; cash1 = st.cash1 ; 
+    cash2 = st.cash2 ; pot = st.pot
+  ; ante = st.ante ; previous_bet = st.previous_bet ; turn = st.turn
+  ; started = st.started ; stage = amt;
+    previous_move = st.previous_move
+  } 
+
+
 
 (**BEGINNING OF NON TURN BASED STATE FUNCTIONS ex deal, flop, turn river 
    winner, buyin **)
@@ -113,7 +124,7 @@ let current_hand st =
    array st.cards, then auto bets the ante of each player.  **)
 let deal st = 
 
-  print_endline "\nDealing hands now \n";
+  print_endline "\nDealing hands now. "; print_endline ("Each player pays an ante of $" ^ string_of_int st.ante ^ "\n");
 
   if (Array.length st.cards <> 9) then ((print_endline "Dealing not possible"); st)
   else 
@@ -539,14 +550,20 @@ let new_cards st cmd =
 
   (*If the action is Call, then automatically move to check which updated state 
     to return**)
-  | Call -> if st.previous_bet <= 0 then call st else (
-      match st.stage with 
-      | 1 -> flop (call st)
-      | 2 -> turn (call st)
-      | 3 -> river (call st)
-      | 4 -> winner (call st)
-      | _ -> (call st)
-    )
+  | Call -> (if st.previous_bet <= 0 then call st else 
+             if 
+               (match st.turn with 
+                | 1 -> if st.previous_bet > st.cash1 then true else false
+                | _ -> if st.previous_bet > st.cash2 then true else false)
+             then (call st)
+             else 
+               match st.stage with 
+               | 1 -> flop (call st)
+               | 2 -> turn (call st)
+               | 3 -> river (call st)
+               | 4 -> winner (call st)
+               | _ -> (call st)
+            )
 
 
   (**If action is Check, then checks to see if previous move was also Check, if
