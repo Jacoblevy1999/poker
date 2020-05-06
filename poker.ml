@@ -260,7 +260,7 @@ let rec format_lst c =
 let hand_to_input hand = 
   let rec aux hand acc =
     match hand with 
-    |[] -> Array.of_list acc
+    |[] -> Array.of_list (List.rev acc)
     |(k,v)::t -> aux t ((val_dict1.(k),(String.capitalize_ascii v))::acc)
   in aux hand []
 
@@ -281,9 +281,9 @@ let pp3 input =
         "
 
 let pp4 input =
-  "         ___    ___    ___
-        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(2))^"  |
-        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(2))^"|
+  "         ___    ___    ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|
         |___|  |___|  |___|  |___|
         "
 
