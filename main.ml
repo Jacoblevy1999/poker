@@ -15,8 +15,10 @@ let rec ante_check state =
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move"; Loop) in
   match command with 
-  | Buy_in amount -> if (amount>=state.ante) then (buyin state amount) else ((print_endline ("\nMust buy in for atleast the Ante amount of $" ^ string_of_int state.ante ^ "\n" )); ante_check state)
+  | Buy_in amount -> (buyin state amount) 
   |Quit -> print_endline "Thanks for playing!" ; exit 0
+  |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); ante_check state
+  |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); ante_check state
   | _ -> print_endline "Please buy in for more before countinuing by typing 'buy in [x]' or exit the game by typing 'quit'" ; ante_check state
 
 let rec loop state : unit = 
@@ -30,7 +32,7 @@ let rec loop state : unit =
       match state.cash1 < state.ante with 
 
       (**means player 1 does not have enough for ante **)
-      | true -> print_endline "\nPlayer 1 does not have enough to pay the ante, please buy in for more \n" ;
+      | true -> print_endline ("\nPlayer 1 does not have enough to pay the ante of $"^  string_of_int state.ante ^ ". You currently have $" ^ string_of_int state.cash1 ^ ". You must buy in for atleast $" ^ string_of_int (state.ante - state.cash1) ^ " more.\n");
 
         (**if its player 1 turn then just buy in for more and move on **)
         if (state.turn == 1)
@@ -42,7 +44,7 @@ let rec loop state : unit =
           loop finalstate
 
       (**means player 2 does not have enough for ante **)
-      | false ->  print_endline "\nPlayer 2 does not have enough to pay the ante, please buy in for more \n" ;
+      | false ->  print_endline ("\nPlayer 2 does not have enough to pay the ante of $"^  string_of_int state.ante ^ ". You currently have $" ^ string_of_int state.cash2 ^ ". You must buy in for atleast $" ^ string_of_int (state.ante - state.cash2) ^ " more.\n");
         (**if its player 1 turn then just buy in for more and move on **)
         if (state.turn == -1)
         then loop (ante_check state)
