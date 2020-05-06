@@ -65,9 +65,9 @@ let rec loop state : unit =
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
   match command with
-  |Call -> loop (new_cards (state) Call)
-  |Check -> loop (new_cards state Check)
-  |Fold -> loop (fold state)
+  |Call -> print_endline ""; loop (new_cards (state) Call)
+  |Check -> print_endline ""; loop (new_cards state Check)
+  |Fold -> print_endline ""; loop (fold state)
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
   |Raise amount -> if amount<>(-1) then loop (raise state amount) else (print_endline "How much do you want to raise?"); loop state
   |Buy_in amount -> if amount<>(-1) then loop (buyin state amount)
@@ -90,7 +90,11 @@ let rec loop state : unit =
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop state
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop state
   |Quit -> print_endline "Thanks for playing!" ; exit 0
-  |Clear -> let _ = Sys.command("clear") in loop state 
+  |Clear -> let _ = Sys.command("clear") in 
+    if state.stage = 0 || state.stage = 1 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; loop state)
+    else if state.stage = 2 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp3)); loop state)
+    else if state.stage = 3 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp4)); loop state)
+    else if state.stage = 4 then (print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline ""; print_endline "";(print_endline "The cards on the table are:"); (print_endline (Array.to_list (state.table) |> hand_to_input |> pp5)); loop state)
   |Loop -> loop state
 
 let rec set_buy_in str = 
