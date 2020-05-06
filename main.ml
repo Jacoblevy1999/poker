@@ -6,8 +6,58 @@ let whose_turn state =
   if state.turn = 1 then print_string "It is player 1's turn. > "
   else print_string "It is player 2's turn. > "
 
-let rec loop state : unit = 
+(**if each player has enough cash, then this is looped back into state, if not
+   then it recurses until player buys in for enough **)
+
+(**returns a dealt hand after ante is paid, else it recurses until ante is paid **)
+let rec ante_check state = 
   whose_turn state;
+  let move = read_line () in
+  let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move"; Loop) in
+  match command with 
+  | Buy_in amount -> if (amount>=state.ante) then (buyin state amount) else ((print_endline ("\nMust buy in for atleast the Ante amount of $" ^ string_of_int state.ante ^ "\n" )); ante_check state)
+  |Quit -> print_endline "Thanks for playing!" ; exit 0
+  | _ -> print_endline "Please buy in for more before countinuing by typing 'buy in [x]' or exit the game by typing 'quit'" ; ante_check state
+
+let rec loop state : unit = 
+
+  (**checks if in pre-deal stage **)
+  if state.stage == 0 
+  then (
+
+    if (state.cash1 < state.ante || state.cash2  < state.ante) then 
+
+      match state.cash1 < state.ante with 
+
+      (**means player 1 does not have enough for ante **)
+      | true -> print_endline "\nPlayer 1 does not have enough to pay the ante, please buy in for more \n" ;
+
+        (**if its player 1 turn then just buy in for more and move on **)
+        if (state.turn == 1)
+        then loop (ante_check state)
+        (**if it is not player 1 turn, then we make it player 1 turn he buys in, and we return back to original turn *)
+        else let tempstate = check state in 
+          let antestate = ante_check tempstate in 
+          let finalstate = check antestate in 
+          loop finalstate
+
+      (**means player 2 does not have enough for ante **)
+      | false ->  print_endline "\nPlayer 2 does not have enough to pay the ante, please buy in for more \n" ;
+        (**if its player 1 turn then just buy in for more and move on **)
+        if (state.turn == -1)
+        then loop (ante_check state)
+        (**if it is not player 1 turn, then we make it player 1 turn he buys in, and we return back to original turn *)
+        else let tempstate = check state in 
+          let antestate = ante_check tempstate in 
+          let finalstate = check antestate in 
+          loop finalstate
+
+    else loop (deal state)
+  )
+
+  else 
+
+    whose_turn state;
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
   match command with
@@ -81,7 +131,7 @@ let play_game =
   print_endline "To quit, type 'quit'.";
   print_endline "To see this list of commands again, type 'help'.";
   print_endline "Player 1 starts. Enjoy the game!";
-  loop init
+  loop (init)
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () =
