@@ -52,10 +52,9 @@ let str_to_strlst str =
 
     An [move_phrase] is not permitted to be the empty list. *)
 let rec is_phrase_wellformed strlst = 
-  if (List.length strlst = 0) then raise(Empty) else 
-    match strlst with 
-    |[] -> true
-    |h::t -> if h = " " || h = "" then raise(Invalid_move) else true 
+  match strlst with 
+  |[] -> true
+  |h::t -> if h = " " || h = "" then raise(Invalid_move) else true 
 
 (** [remove_dsign str] takes a string of the form of a dollar sign ($) followed
     by an integer and returns the integer as type int. 
@@ -70,7 +69,7 @@ let remove_dsign str =
 let parse str = 
   let move = str_to_strlst str in
   match move with 
-  |[] -> raise(Empty)
+  |[] -> Loop
   |h::t -> 
     match h, t with 
     |"fold", [] -> Fold
