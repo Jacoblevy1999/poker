@@ -21,6 +21,7 @@ type move =
   |Help
   |Quit
   |Clear
+  |Deal
   |Loop
 
 
@@ -85,6 +86,7 @@ let parse str =
     |"help", [] -> Help
     |"pot", [] -> Pot
     |"clear", [] -> Clear 
+    |"deal", [] -> Deal
     |"p1", [x] -> if x = "cards" then Cards1 
       else if x = "cash" then Cash1
       else raise(Invalid_move)
