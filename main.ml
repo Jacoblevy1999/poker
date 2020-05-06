@@ -2,11 +2,35 @@ open Poker
 open State 
 open Command
 
-
-
 let whose_turn state = 
   if state.turn = 1 then print_string "It is player 1's turn. > "
   else print_string "It is player 2's turn. > "
+
+(**pre deal state, only allows players to [yes] for countinue, [quit] to exit,
+   or [buy in x] to buy in, only times you can buy in are during pre-deal **)
+
+(**once pre deal stage is done, stage is turned to -1 to quickly pass the ante-
+   check, once that is done it is switched to deal state and hand begins **)
+let rec predeal state acc = 
+  (match state.turn with 
+   | 1 -> print_endline ("\nPlayer 1 currently has $" ^ string_of_int state.cash1 ^ ". You may now [buy in] for more, or [quit] the game. To begin the hand, type [deal].\n")
+   | _ -> print_endline ("\nPlayer 2 currently has $" ^ string_of_int state.cash2 ^ ". You may now [buy in] for more, or [quit] the game. To begin the hand, type [deal].\n")
+  );
+  whose_turn state;
+
+  (**matches commands during pre-deal stage *
+     If [buy in] allows player to add money until satisfied
+     If [deal] will either move to next player's turn or deal new cards
+     If [quit] will quit game**)
+  let move = read_line () in
+  let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move"; Loop) in
+  match command with 
+  |Deal -> if (acc == 1) then (set_stage (check state) (-1)) else (predeal (check state) 1)
+  |Buy_in amount -> (let buystate = (buyin (state) (amount)) in predeal buystate acc)
+  |Quit -> print_endline "Thanks for playing!" ; exit 0
+  |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); predeal state acc
+  |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); predeal state acc
+  | _ -> print_endline "Must either [buy in] , [quit] or [deal] to countinue" ; predeal state acc
 
 (**if each player has enough cash, then this is looped back into state, if not
    then it recurses until player buys in for enough **)
@@ -21,44 +45,53 @@ let rec ante_check state =
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); ante_check state
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); ante_check state
-  | _ -> print_endline "Please buy in for more before countinuing by typing 'buy in [x]' or exit the game by typing 'quit'" ; ante_check state
+  | _ -> print_endline "Please buy in for more before countinuing by typing [buy in] or exit the game by typing [quit]" ; ante_check state
+
+(**helper function during ante check to parse through which user's turn
+   it is and how much they need to pay  **)
+
+(**returns a state with stage = 0 if ante is not paid up, if ante amounts of
+   both players are confirmed, it returns state after deal, and moves stage 
+   up to stage = 1 **)
+let ante_check_2 state = 
+  if (state.cash1 < state.ante || state.cash2  < state.ante) then 
+
+    match state.cash1 < state.ante with 
+
+    (**means player 1 does not have enough for ante **)
+    | true -> print_endline ("\nPlayer 1 does not have enough to pay the ante of $"^  string_of_int state.ante ^ ". You currently have $" ^ string_of_int state.cash1 ^ ". You must buy in for atleast $" ^ string_of_int (state.ante - state.cash1) ^ " more.\n");
+
+      (**if its player 1 turn then just buy in for more and move on **)
+      if (state.turn == 1)
+      then (ante_check state)
+      (**if it is not player 1 turn, then we make it player 1 turn he buys in, and we return back to original turn *)
+      else let tempstate = check state in 
+        let antestate = ante_check tempstate in 
+        let finalstate = check antestate in 
+        finalstate
+
+    (**means player 2 does not have enough for ante **)
+    | false ->  print_endline ("\nPlayer 2 does not have enough to pay the ante of $"^  string_of_int state.ante ^ ". You currently have $" ^ string_of_int state.cash2 ^ ". You must buy in for atleast $" ^ string_of_int (state.ante - state.cash2) ^ " more.\n");
+      (**if its player 1 turn then just buy in for more and move on **)
+      if (state.turn == -1)
+      then (ante_check state)
+      (**if it is not player 1 turn, then we make it player 1 turn he buys in, and we return back to original turn *)
+      else let tempstate = check state in 
+        let antestate = ante_check tempstate in 
+        let finalstate = check antestate in 
+        finalstate
+
+  else (deal state)
+
+
 
 let rec loop state : unit = 
 
-  (**checks if in pre-deal stage **)
+  (**pre deal stuff **)
   if state.stage == 0 
-  then (
-
-    if (state.cash1 < state.ante || state.cash2  < state.ante) then 
-
-      match state.cash1 < state.ante with 
-
-      (**means player 1 does not have enough for ante **)
-      | true -> print_endline ("\nPlayer 1 does not have enough to pay the ante of $"^  string_of_int state.ante ^ ". You currently have $" ^ string_of_int state.cash1 ^ ". You must buy in for atleast $" ^ string_of_int (state.ante - state.cash1) ^ " more.\n");
-
-        (**if its player 1 turn then just buy in for more and move on **)
-        if (state.turn == 1)
-        then loop (ante_check state)
-        (**if it is not player 1 turn, then we make it player 1 turn he buys in, and we return back to original turn *)
-        else let tempstate = check state in 
-          let antestate = ante_check tempstate in 
-          let finalstate = check antestate in 
-          loop finalstate
-
-      (**means player 2 does not have enough for ante **)
-      | false ->  print_endline ("\nPlayer 2 does not have enough to pay the ante of $"^  string_of_int state.ante ^ ". You currently have $" ^ string_of_int state.cash2 ^ ". You must buy in for atleast $" ^ string_of_int (state.ante - state.cash2) ^ " more.\n");
-        (**if its player 1 turn then just buy in for more and move on **)
-        if (state.turn == -1)
-        then loop (ante_check state)
-        (**if it is not player 1 turn, then we make it player 1 turn he buys in, and we return back to original turn *)
-        else let tempstate = check state in 
-          let antestate = ante_check tempstate in 
-          let finalstate = check antestate in 
-          loop finalstate
-
-    else loop (deal state)
-  )
-
+  then (loop (predeal state 0))
+  else if state.stage == -1
+  then loop (ante_check_2 state)
   else 
 
     whose_turn state;
