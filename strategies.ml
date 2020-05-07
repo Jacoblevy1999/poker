@@ -31,7 +31,7 @@ let chen_strength (in_hand:card list) : int=
   let pair = if (pairs in_hand []) <> [] then true else false in
   let snd = List.hd (List.tl (values_in_hand in_hand)) in 
   let gap = (highest - snd)-1 in
-  let gap_pts = if gap = 0 then (-1) else if gap = 1 or gap = -1 then 0 else if gap = 2 then 
+  let gap_pts = if gap = 0 then (-1) else if gap = 1 || gap = -1 then 0 else if gap = 2 then 
       2 else if gap = 3 then 4 else 5 in 
   if pair then (floor_five (int_of_float (2. *. highest_val))) - (gap_pts) else
   if suited then (ceil highest_val) + 2 - (gap_pts) else
@@ -96,13 +96,21 @@ let med_strat (st:State.t) : Command.move =
     |Some Check
     |None -> let chance = (pct_chance 0 0 1000 st.table st.hand1) in
       Random.self_init(); let r = Random.float 1. in
-      if chance > 0.85 then Bet (bet_range (st.pot/3) st.pot*5) else 
-      if chance > 0.75 then Bet (bet_range (st.pot/3) st.pot*3) else 
-      if chance > 0.65 then Bet (bet_range (st.pot/4) st.pot*2) else 
-      if chance > 0.50 then Bet (bet_range (st.pot/8) st.pot) else 
+      if chance > 0.85 then Bet (bet_range (st.pot/3) st.pot*4) else 
+      if chance > 0.75 then Bet (bet_range (st.pot/3) st.pot*2) else 
+      if chance > 0.65 then Bet (bet_range (st.pot/4) st.pot) else 
+      if chance > 0.50 then Bet (bet_range (st.pot/8) 2*st.pot/3) else 
       if chance < 0.25 then Fold else
       if r > 0.9 then Bet (bet_range (st.pot/3) st.pot*3) else Fold
-    |_ -> failwith "unimplemented"
+    |_ -> let chance = (pct_chance 0 0 1000 st.table st.hand1) in
+      Random.self_init(); let r = Random.float 1. in
+      if chance > 0.85 then if r > 0.85 then Call else Raise (bet_range (st.pot/3) st.pot*3) else 
+      if chance > 0.75 then if r > 0.4 then Call else Raise (bet_range (st.pot/4) st.pot*2) else 
+      if chance > 0.65 then if r > 0.25 then Call else Bet (bet_range (st.pot/4) st.pot) else 
+      if chance > 0.50 then if r > 0.4 then Call else 
+        if r > 0.85 then Raise (bet_range (st.pot/8) st.pot) else Fold else
+      if chance < 0.25 then Fold else
+      if r > 0.9 then Raise (bet_range (st.pot/3) st.pot*3) else Fold
 
 
 (* 
