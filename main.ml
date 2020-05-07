@@ -139,7 +139,7 @@ let command_input state =
     let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in command
 
   (**if AI, inputs are attracted from strategies **)
-  else let command = easy_strat state in command
+  else let command = hard_strat state in command
 
 
 (**Player vs AI **)
@@ -166,8 +166,8 @@ let rec loop2 state =
     print_endline "To quit, type 'quit'.";
     print_endline "To see this list of commands again, type 'help'.";
     loop2 state
-  |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; (loop2 state);) else print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state
-  |Cards2 -> if state.turn <> -1 then (print_endline "You can't look at player 2's cards!"; (loop2 state);) else print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state
+  |Cards1 -> print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state
+  |Cards2 -> print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state
   |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); loop2 state
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop2 state
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop2 state

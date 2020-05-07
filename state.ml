@@ -184,10 +184,10 @@ let init_state cash1 cash2 ante started =
 
   (**state is initialized but cards are assigned to random array list of 9 
      cards called from Poker.shuffle **)
-  { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
-    table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
-    cash2 = cash2 ; pot = 0 ; ante = ante ; previous_bet = 0 ; turn = started
-  ; started = started ; stage = 0 ; previous_move = []} 
+  deal { hand1 = Array.of_list ([]) ; hand2 = Array.of_list ([]) ; 
+         table = Array.of_list ([]) ; cards = cards ; cash1 = cash1 ; 
+         cash2 = cash2 ; pot = 0 ; ante = ante ; previous_bet = 0 ; turn = started
+       ; started = started ; stage = 0 ; previous_move = []} 
 
 let flop st = 
   (**have assert statement to confirm length of array st.cards is 5 if fails
@@ -322,7 +322,6 @@ let fold st =
 
 (**takes in state and an amount and bets it dependent on player turn **)
 let bet st amt = 
-
   (**If previous bet was made, you cannot bet again **)
   if (st.previous_bet > 0) then ((print_endline "Must call, raise, or fold") ; st)
   else

@@ -76,32 +76,35 @@ let preflop_bet last pot in_hand : Command.move=
   let strength = chen_strength in_hand in
   match last with
   |Some Check
-  |None -> if strength >= 12 then Bet (bet_range (pot) (pot*3)) else if strength >= 10
+  |None -> if strength >= 10 then Bet (bet_range (pot) (pot*4)) else if strength >= 8
+    then Bet (bet_range (pot/2) (pot*3)) else if strength >= 5
     then Bet (bet_range (pot/2) (pot*2)) else let r = Random.float 1. in if r < 0.8 then
         Check else Bet (bet_range (pot/2) (pot*2))
-  | _ -> let r = Random.float 1. in if strength >= 12 then if r > 0.9 then Call else
-        Raise (bet_range (pot) (pot*2)) else if strength >= 10
-    then if r > 0.95 then Raise (bet_range (pot) (pot*2)) else if 
-        r > 0.85 then Fold else Call else if r < 0.8 then
-      Fold else Raise (bet_range (pot/2) (pot*2))
+  | _ -> let r = Random.float 1. in if strength >= 10 then if r > 0.9 then Call else
+        Raise (bet_range (pot) (pot*2)) else if strength >= 8
+    then if r > 0.75 then Raise (bet_range (pot) (pot*2))
+      else Call else if strength >= 5
+    then if r > 0.9 then Raise (bet_range (pot) (pot*2))
+      else if r > 0.85 then Fold else Call else if strength < 3 then Fold else if r < 0.75 then
+      Fold else Call
 
-(** [med_strat st] is the following move of the computer, given the currrent state,
+(** [hard_strat st] is the following move of the computer, given the currrent state,
     according to an informed betting strategy. *)
-let med_strat (st:State.t) : Command.move = 
+let hard_strat (st:State.t) : Command.move = 
   let last = if st.previous_move = [] then None else
       Some (List.hd st.previous_move) in
   let num_cards = Array.length st.table + Array.length st.hand1 in
   if num_cards = 2 then preflop_bet last st.pot (Array.to_list st.hand1) else
     match last with
     |Some Check
-    |None -> let chance = (pct_chance 0 0 1000 st.table st.hand1) in
+    |None -> let chance = (pct_chance 0 0 2000 st.table st.hand1) in
       Random.self_init(); let r = Random.float 1. in
       if chance > 0.85 then Bet (bet_range (st.pot/3) st.pot*4) else 
       if chance > 0.75 then Bet (bet_range (st.pot/3) st.pot*2) else 
       if chance > 0.65 then Bet (bet_range (st.pot/4) st.pot) else 
       if chance > 0.50 then Bet (bet_range (st.pot/8) 2*st.pot/3) else 
-      if chance < 0.25 then Fold else
-      if r > 0.9 then Bet (bet_range (st.pot/3) st.pot*3) else Fold
+      if chance < 0.25 then Check else
+      if r > 0.9 then Bet (bet_range (st.pot/3) st.pot*3) else Check
     |_ -> let chance = (pct_chance 0 0 1000 st.table st.hand1) in
       Random.self_init(); let r = Random.float 1. in
       if chance > 0.85 then if r > 0.85 then Call else Raise (bet_range (st.pot/3) st.pot*3) else 
