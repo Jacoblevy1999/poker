@@ -148,7 +148,7 @@ let rec loop state : unit =
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Clear -> let _ = Sys.command("clear") in (print_endlines 0); (pp_cards state); loop state 
   |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop state
-  |AllIn -> loop (allin state)
+  |AllIn -> loop (new_cards state AllIn)
   |Loop -> loop state
 
 (**designates which command input to follow  **)
