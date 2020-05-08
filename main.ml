@@ -3,7 +3,16 @@ open State
 open Command
 open Strategies
 
+let print_endlines a = 
+  for x = a to 13 do 
+    print_endline ""
+  done
 
+let pp_cards state = 
+  if state.stage = 2 then (print_endline "The cards on the table are:"; print_endline (Array.to_list (state.table) |> hand_to_input |> pp3);)
+  else if state.stage = 3 then (print_endline "The cards on the table are:"; print_endline (Array.to_list (state.table) |> hand_to_input |> pp4);)
+  else if state.stage = 4 then (print_endline "The cards on the table are:"; print_endline (Array.to_list (state.table) |> hand_to_input |> pp5);)
+  else print_string""
 
 let string_of_command command = 
   match command with
@@ -137,7 +146,7 @@ let rec loop state : unit =
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop state
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop state
   |Quit -> print_endline "Thanks for playing!" ; exit 0
-  |Clear -> let _ = Sys.command("clear") in  loop state 
+  |Clear -> let _ = Sys.command("clear") in (print_endlines 0); (pp_cards state); loop state 
   |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop state
   |AllIn -> loop (allin state)
   |Loop -> loop state
@@ -188,7 +197,7 @@ let rec loop2 state =
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop2 state
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop2 state
   |Quit -> print_endline "Thanks for playing!" ; exit 0
-  |Clear -> let _ = Sys.command("clear") in loop2 state 
+  |Clear -> let _ = Sys.command("clear") in (print_endlines 0); (pp_cards state); loop2 state 
   |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop2 state
   |AllIn -> loop2 (allin state)
   |Loop -> loop2 state
