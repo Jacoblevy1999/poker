@@ -13,6 +13,7 @@ let string_of_command command =
   |Raise n -> "raises to $"^(string_of_int n)
   |Buy_in n -> "buys in for $"^(string_of_int n)^"more"
   |Fold -> "folds"
+  |AllIn -> "all in"
   |_ -> "is confused"
 
 let whose_turn state = 
@@ -138,7 +139,7 @@ let rec loop state : unit =
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Clear -> let _ = Sys.command("clear") in  loop state 
   |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop state
-  |AllIn -> loop state
+  |AllIn -> loop (allin state)
   |Loop -> loop state
 
 (**designates which command input to follow  **)
@@ -189,7 +190,7 @@ let rec loop2 state =
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Clear -> let _ = Sys.command("clear") in loop2 state 
   |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop2 state
-  |AllIn -> loop state
+  |AllIn -> loop2 (allin state)
   |Loop -> loop2 state
 
 
