@@ -10,11 +10,15 @@ let legal_bet st n : Command.move =
 (** [legal_raise st n] makes sure [n] is a legal raise, given state [st]. If it
     is not a legal raise, it corrects it to be so. *)
 let legal_raise st n : Command.move = 
-  if n > st.cash1 then AllIn else if n < 2*st.previous_bet then Call else Raise n
+  if n > st.cash1 then AllIn else if n < 2*(match st.turn with
+      | 1 -> st.previous_bets_2
+      | _ -> st.previous_bets_1) then Call else Raise n
 
 (** [legal_call st] is [Call] if the AI can call, and [Fold] otherwise. *)
 let legal_call st : Command.move = 
-  if st.cash2 = 0 then Call else if st.previous_bet > st.cash1 then AllIn else Call
+  if st.cash2 = 0 then Call else if (match st.turn with
+      | 1 -> st.previous_bets_2
+      | _ -> st.previous_bets_1) > st.cash1 then AllIn else Call
 
 (** [easy_strat st] is the following move of the computer, given the currrent state.
     For this particularly easy strategy, that means calling all bets, and checking otherwise.*)
@@ -104,7 +108,9 @@ let preflop_bet st last pot in_hand : Command.move=
           Check else legal_bet st (bet_range (pot/2) (pot*2))
     |Some AllIn -> if strength >= 1 then AllIn else Fold
     | _ -> let r = Random.float 1. in 
-      let bet_prop = (float_of_int st.previous_bet) /. (float_of_int st.pot) in
+      let bet_prop = (float_of_int (match st.turn with
+          | 1 -> st.previous_bets_2
+          | _ -> st.previous_bets_1)) /. (float_of_int st.pot) in
       let heuristic = 3 * strength - (int_of_float (bet_prop *. 10.)) in
       if heuristic >= 25 then if r > 0.9 then legal_call st else
           legal_raise st (bet_range (pot) (pot*2)) else if heuristic >= 21
@@ -118,7 +124,9 @@ let preflop_bet st last pot in_hand : Command.move=
     to a bet or raise, given a current state [st] and [chance] of winning. *)
 let reactionary_bet chance st = 
   Random.self_init(); let r = Random.float 1. in
-  let bet_prop = (float_of_int st.previous_bet) /. (float_of_int st.pot) in
+  let bet_prop = (float_of_int (match st.turn with
+      | 1 -> st.previous_bets_2
+      | _ -> st.previous_bets_1)) /. (float_of_int st.pot) in
   let heuristic = 2.5 *. chance -. bet_prop in
   if heuristic > 2.05 then legal_raise st (bet_range (st.pot/2) st.pot*4)
   else if heuristic > 1.80 then if r > 0.85 then legal_call st else 
