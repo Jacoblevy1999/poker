@@ -22,7 +22,7 @@ let string_of_command command =
   |Raise n -> "raises to $"^(string_of_int n)
   |Buy_in n -> "buys in for $"^(string_of_int n)^"more"
   |Fold -> "folds"
-  |AllIn -> "all in"
+  |AllIn -> "is all in"
   |_ -> "is confused"
 
 let whose_turn state = 
@@ -199,7 +199,7 @@ let rec loop2 state mode=
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Clear -> let _ = Sys.command("clear") in (print_endlines 0); (pp_cards state); loop2 state mode
   |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop2 state mode
-  |AllIn -> loop2 (allin state) mode
+  |AllIn -> loop2 (new_cards state AllIn) mode
   |Loop -> loop2 state mode
 
 
