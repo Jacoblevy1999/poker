@@ -2,7 +2,15 @@ open Poker
 open Command
 open State
 
-(** *)
+(** [legal_bet st n] makes sure [n] is a legal bet, given state [st]. If it
+    is not a legal bet, it corrects it to be so. *)
+let legal_bet st n : Command.move = 
+  if n < st.ante then Check else if n > st.cash1 then AllIn else Bet n
+
+(** [legal_raise st n] makes sure [n] is a legal raise, given state [st]. If it
+    is not a legal raise, it corrects it to be so. *)
+let legal_raise st n : Command.move = 
+  if n > st.cash1 then AllIn else if n < 2*st.previous_bet then Call else Raise n
 
 (** [easy_strat st] is the following move of the computer, given the currrent state.
     For this particularly easy strategy, that means calling all bets, and checking otherwise.*)
@@ -77,23 +85,23 @@ let bet_range min max =
   Random.self_init();
   min + (Random.int max-min)
 
-(** [preflop_bet last pot in_hand] is the appropriate preflop action for the
-    CPU to take given the most recent move [last], the current size of the
-    [pot] and what cards the player has [in_hand]. *)
-let preflop_bet last pot in_hand : Command.move=
+(** [preflop_bet st last pot in_hand] is the appropriate preflop action for the
+    CPU to take given the most recent move [last], the current state [st],
+    the current size of the [pot] and what cards the player has [in_hand]. *)
+let preflop_bet st last pot in_hand : Command.move=
   Random.self_init();
   let strength = chen_strength in_hand in
   match last with
   |Some Check
-  |None -> if strength >= 10 then Bet (bet_range (pot) (pot*4)) else if strength >= 8
-    then Bet (bet_range (pot) (pot*5)) else if strength >= 5
-    then Bet (bet_range (pot/2) (pot*4)) else let r = Random.float 1. in if r < 0.8 then
-        Check else Bet (bet_range (pot/2) (pot*2))
+  |None -> if strength >= 10 then legal_bet st (bet_range (pot) (pot*4)) else if strength >= 8
+    then legal_bet st (bet_range (pot) (pot*5)) else if strength >= 5
+    then legal_bet st (bet_range (pot/2) (pot*4)) else let r = Random.float 1. in if r < 0.8 then
+        Check else legal_bet st (bet_range (pot/2) (pot*2))
   | _ -> let r = Random.float 1. in if strength >= 10 then if r > 0.9 then Call else
-        Raise (bet_range (pot) (pot*2)) else if strength >= 8
-    then if r > 0.75 then Raise (bet_range (pot) (pot*2))
+        legal_raise st (bet_range (pot) (pot*2)) else if strength >= 8
+    then if r > 0.75 then legal_raise st (bet_range (pot) (pot*2))
       else Call else if strength >= 5
-    then if r > 0.9 then Raise (bet_range (pot) (pot*2))
+    then if r > 0.9 then legal_raise st (bet_range (pot) (pot*2))
       else if r > 0.85 then Fold else Call else if strength < 3 then Fold else if r < 0.75 then
       Fold else Call
 
@@ -103,14 +111,15 @@ let reactionary_bet chance st =
   Random.self_init(); let r = Random.float 1. in
   let bet_prop = st.previous_bet/st.pot in
   let heuristic = 2.5 *. chance -. (float_of_int bet_prop) in
-  if heuristic > 2.05 then Raise (bet_range (st.pot/2) st.pot*4)
-  else if heuristic > 1.80 then if r > 0.85 then Call else Raise (bet_range (st.pot/3) st.pot*3) else 
-  if heuristic > 1.65 then if r > 0.4 then Call else Raise (bet_range (st.pot/4) st.pot*2) else 
-  if chance > 1.5 then if r > 0.25 then Call else Bet (bet_range (st.pot/4) st.pot) else 
-  if chance > 1.35 then if r > 0.4 then Call else 
-    if r < 0.25 then Raise (bet_range (st.pot/8) st.pot) else Fold else
+  if heuristic > 2.05 then legal_raise st (bet_range (st.pot/2) st.pot*4)
+  else if heuristic > 1.80 then if r > 0.85 then Call else 
+      legal_raise st (bet_range (st.pot/3) st.pot*3) else 
+  if heuristic > 1.65 then if r > 0.4 then Call else legal_raise st (bet_range (st.pot/4) st.pot*2) else 
+  if heuristic > 1.5 then if r > 0.25 then Call else legal_raise st (bet_range (st.pot/4) st.pot) else 
+  if heuristic > 1.35 then if r > 0.4 then Call else 
+    if r < 0.25 then legal_raise st (bet_range (st.pot/8) st.pot) else Fold else
   if heuristic < 1.15 then Fold else
-  if r > 0.85 then Raise (bet_range (st.pot/3) st.pot*3) else Fold
+  if r > 0.85 then legal_raise st (bet_range (st.pot/3) st.pot*3) else Fold
 
 (** [hard_strat st] is the following move of the computer, given the currrent state,
     according to an informed betting strategy. *)
@@ -118,17 +127,17 @@ let hard_strat (st:State.t) : Command.move =
   let last = if st.previous_move = [] then None else
       Some (List.hd st.previous_move) in
   let num_cards = Array.length st.table + Array.length st.hand1 in
-  if num_cards = 2 then preflop_bet last st.pot (Array.to_list st.hand1) else
+  if num_cards = 2 then preflop_bet st last st.pot (Array.to_list st.hand1) else
     match last with
     |Some Check
     |None -> let chance = (pct_chance 0 0 1000 st.table st.hand1) in
       Random.self_init(); let r = Random.float 1. in
       if chance > 0.85 then if r > 0.85 then Bet (bet_range (st.pot) st.pot*7) 
         else Bet (bet_range (st.pot/3) st.pot*4) else 
-      if chance > 0.75 then Bet (bet_range (st.pot/3) st.pot*3) else 
-      if chance > 0.65 then Bet (bet_range (st.pot/4) st.pot*2) else 
-      if chance > 0.50 then Bet (bet_range (st.pot/8) st.pot) else 
+      if chance > 0.75 then legal_bet st (bet_range (st.pot/3) st.pot*3) else 
+      if chance > 0.65 then legal_bet st (bet_range (st.pot/4) st.pot*2) else 
+      if chance > 0.50 then legal_bet st (bet_range (st.pot/8) st.pot) else 
       if chance < 0.25 then Check else
-      if r > 0.8 then Bet (bet_range (st.pot/3) st.pot*4) else Check
+      if r > 0.8 then legal_bet st (bet_range (st.pot/3) st.pot*4) else Check
     |_ -> let chance = (pct_chance 0 0 1000 st.table st.hand1) in
       reactionary_bet chance st
