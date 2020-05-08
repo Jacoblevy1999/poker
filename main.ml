@@ -3,6 +3,16 @@ open State
 open Command
 open Strategies
 
+
+let string_of_command command = 
+  match command with
+  |Check -> "checks"
+  |Call -> "calls"
+  |Bet n -> "bets $"^(string_of_int n)
+  |Raise n -> "raises to $"^(string_of_int n)
+  |Buy_in n -> "buys in for $"^(string_of_int n)^"more"
+  |_ -> "is confused"
+
 let whose_turn state = 
   if state.turn = 1 then print_string "It is player 1's turn. > "
   else print_string "It is player 2's turn. > "
@@ -144,8 +154,10 @@ let command_input state =
 
 (**Player vs AI **)
 let rec loop2 state = 
-  whose_turn state;
+  if state.hand1 = (Array.of_list []) then loop2 (deal state) else
+    whose_turn state;
   let command = command_input state in 
+  if state.turn = 1 then print_endline ("The AI "^(string_of_command command));
   match command with
   |Call -> loop2 (new_cards (state) Call)
   |Check -> loop2 (new_cards state Check)
@@ -187,6 +199,15 @@ let rec set_buy_in str =
     if buy_int_int > 9 && buy_int_int < 1000001 then buy_int_int 
     else set_buy_in ""
 
+let rec set_game_mode str = 
+  print_endline "Would you like to play against a human, or a computer? 
+  Type 'cpu' or 'human'.";
+  print_string "> ";
+  let game_mode = read_line () in
+  if game_mode = "quit" then begin print_endline "Thanks for playing!" ; exit 0 end
+  else if game_mode = "cpu" then 1 else if game_mode = "human" then 2 else
+    set_game_mode ""
+
 let rec set_ante str = 
   print_endline "Type an amount between $1 and $1000 and then hit enter.";
   print_string  "> ";
@@ -201,6 +222,7 @@ let play_game =
   print_endline
     "\n\nWelcome, are you ready to take a seat at the table and 
   play heads up poker?\n";
+  let game_mode = set_game_mode "" in
   print_endline "How much money is each player gambling with?"; 
   let buy_in_int = set_buy_in "" in
   print_endline "How much is the ante?";
@@ -220,7 +242,7 @@ let play_game =
   print_endline "To quit, type 'quit'.";
   print_endline "To see this list of commands again, type 'help'.";
   print_endline "Player 1 starts. Enjoy the game!";
-  loop2 (init)
+  if game_mode = 1 then loop2 (init) else loop (init)
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () =
