@@ -101,10 +101,13 @@ let preflop_bet st last pot in_hand : Command.move=
     then legal_bet st (bet_range (pot) (pot*5)) else if strength >= 5
     then legal_bet st (bet_range (pot/2) (pot*4)) else let r = Random.float 1. in if r < 0.8 then
         Check else legal_bet st (bet_range (pot/2) (pot*2))
-  | _ -> let r = Random.float 1. in if strength >= 10 then if r > 0.9 then legal_call st else
-        legal_raise st (bet_range (pot) (pot*2)) else if strength >= 8
+  | _ -> let r = Random.float 1. in 
+    let bet_prop = (float_of_int st.previous_bet) /. (float_of_int st.pot) in
+    let heuristic = 3 * strength - (int_of_float (bet_prop *. 10.)) in
+    if heuristic >= 25 then if r > 0.9 then legal_call st else
+        legal_raise st (bet_range (pot) (pot*2)) else if strength >= 21
     then if r > 0.75 then legal_raise st (bet_range (pot) (pot*2))
-      else legal_call st else if strength >= 5
+      else legal_call st else if strength >= 17
     then if r > 0.9 then legal_raise st (bet_range (pot) (pot*2))
       else if r > 0.85 then Fold else legal_call st else if strength < 3 then Fold else if r < 0.75 then
       Fold else legal_call st
@@ -113,8 +116,8 @@ let preflop_bet st last pot in_hand : Command.move=
     to a bet or raise, given a current state [st] and [chance] of winning. *)
 let reactionary_bet chance st = 
   Random.self_init(); let r = Random.float 1. in
-  let bet_prop = st.previous_bet/st.pot in
-  let heuristic = 2.5 *. chance -. (float_of_int bet_prop) in
+  let bet_prop = (float_of_int st.previous_bet) /. (float_of_int st.pot) in
+  let heuristic = 2.5 *. chance -. bet_prop in
   if heuristic > 2.05 then legal_raise st (bet_range (st.pot/2) st.pot*4)
   else if heuristic > 1.80 then if r > 0.85 then legal_call st else 
       legal_raise st (bet_range (st.pot/3) st.pot*3) else 
