@@ -130,12 +130,15 @@ let rec loop state : unit =
                                                 else  (print_endline "How much do you want to buy in?"); loop state) else print_endline "You must finish this hand before buying in for more" ; loop state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
-    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
+    print_endline "To raise a bet, type 'raise [amount]', i.e. 'riase $30' will raise the bet by $30.";
     print_endline "To call, type 'call'.";
     print_endline "To fold, type 'fold'.";
     print_endline "To see player 1's cards, enter 'p1 cards'";
     print_endline "To see player 2's cards, enter 'p2 cards'";
     print_endline "To see the money in the pot, enter 'pot'.";
+    print_endline "To see player 1's cash, enter 'p1 cash'";
+    print_endline "To see player 2's cash, enter 'p2 cash'";
+    print_endline "To go all in, enter 'all in'";
     print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
     print_endline "To quit, type 'quit'.";
     print_endline "To see this list of commands again, type 'help'.";
@@ -181,12 +184,15 @@ let rec loop2 state =
                                                 else  (print_endline "How much do you want to buy in?"); loop2 state) else print_endline "You must finish this hand before buying in for more" ; loop2 state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
-    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
+    print_endline "To raise a bet, type 'raise [amount]', i.e. 'riase $30' will raise the bet by $30.";
     print_endline "To call, type 'call'.";
     print_endline "To fold, type 'fold'.";
     print_endline "To see player 1's cards, enter 'p1 cards'";
     print_endline "To see player 2's cards, enter 'p2 cards'";
     print_endline "To see the money in the pot, enter 'pot'.";
+    print_endline "To see player 1's cash, enter 'p1 cash'";
+    print_endline "To see player 2's cash, enter 'p2 cash'";
+    print_endline "To go all in, enter 'all in'";
     print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
     print_endline "To quit, type 'quit'.";
     print_endline "To see this list of commands again, type 'help'.";
@@ -252,6 +258,7 @@ let play_game =
   print_endline "To see the money in the pot, enter 'pot'.";
   print_endline "To see player 1's cash, enter 'p1 cash'";
   print_endline "To see player 2's cash, enter 'p2 cash'";
+  print_endline "To go all in, enter 'all in'";
   print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
   print_endline "To quit, type 'quit'.";
   print_endline "To see this list of commands again, type 'help'.";
