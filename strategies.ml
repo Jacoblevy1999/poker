@@ -12,6 +12,10 @@ let legal_bet st n : Command.move =
 let legal_raise st n : Command.move = 
   if n > st.cash1 then AllIn else if n < 2*st.previous_bet then Call else Raise n
 
+(** [legal_call st] is [Call] if the AI can call, and [Fold] otherwise. *)
+let legal_call st : Command.move = 
+  if st.previous_bet > st.cash1 then Fold else Call
+
 (** [easy_strat st] is the following move of the computer, given the currrent state.
     For this particularly easy strategy, that means calling all bets, and checking otherwise.*)
 let easy_strat (st:State.t) : Command.move = 
@@ -97,13 +101,13 @@ let preflop_bet st last pot in_hand : Command.move=
     then legal_bet st (bet_range (pot) (pot*5)) else if strength >= 5
     then legal_bet st (bet_range (pot/2) (pot*4)) else let r = Random.float 1. in if r < 0.8 then
         Check else legal_bet st (bet_range (pot/2) (pot*2))
-  | _ -> let r = Random.float 1. in if strength >= 10 then if r > 0.9 then Call else
+  | _ -> let r = Random.float 1. in if strength >= 10 then if r > 0.9 then legal_call st else
         legal_raise st (bet_range (pot) (pot*2)) else if strength >= 8
     then if r > 0.75 then legal_raise st (bet_range (pot) (pot*2))
-      else Call else if strength >= 5
+      else legal_call st else if strength >= 5
     then if r > 0.9 then legal_raise st (bet_range (pot) (pot*2))
-      else if r > 0.85 then Fold else Call else if strength < 3 then Fold else if r < 0.75 then
-      Fold else Call
+      else if r > 0.85 then Fold else legal_call st else if strength < 3 then Fold else if r < 0.75 then
+      Fold else legal_call st
 
 (** [reactionary_bet chance st] is the action taken by the computer in response
     to a bet or raise, given a current state [st] and [chance] of winning. *)
@@ -112,11 +116,13 @@ let reactionary_bet chance st =
   let bet_prop = st.previous_bet/st.pot in
   let heuristic = 2.5 *. chance -. (float_of_int bet_prop) in
   if heuristic > 2.05 then legal_raise st (bet_range (st.pot/2) st.pot*4)
-  else if heuristic > 1.80 then if r > 0.85 then Call else 
+  else if heuristic > 1.80 then if r > 0.85 then legal_call st else 
       legal_raise st (bet_range (st.pot/3) st.pot*3) else 
-  if heuristic > 1.65 then if r > 0.4 then Call else legal_raise st (bet_range (st.pot/4) st.pot*2) else 
-  if heuristic > 1.5 then if r > 0.25 then Call else legal_raise st (bet_range (st.pot/4) st.pot) else 
-  if heuristic > 1.35 then if r > 0.4 then Call else 
+  if heuristic > 1.65 then if r > 0.4 then legal_call st else 
+      legal_raise st (bet_range (st.pot/4) st.pot*2) else 
+  if heuristic > 1.5 then if r > 0.25 then legal_call st else 
+      legal_raise st (bet_range (st.pot/4) st.pot) else 
+  if heuristic > 1.35 then if r > 0.4 then legal_call st else 
     if r < 0.25 then legal_raise st (bet_range (st.pot/8) st.pot) else Fold else
   if heuristic < 1.15 then Fold else
   if r > 0.85 then legal_raise st (bet_range (st.pot/3) st.pot*3) else Fold
