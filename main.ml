@@ -130,15 +130,12 @@ let rec loop state : unit =
                                                 else  (print_endline "How much do you want to buy in?"); loop state) else print_endline "You must finish this hand before buying in for more" ; loop state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
-    print_endline "To raise a bet, type 'raise [amount]', i.e. 'riase $30' will raise the bet by $30.";
+    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
     print_endline "To call, type 'call'.";
     print_endline "To fold, type 'fold'.";
     print_endline "To see player 1's cards, enter 'p1 cards'";
     print_endline "To see player 2's cards, enter 'p2 cards'";
     print_endline "To see the money in the pot, enter 'pot'.";
-    print_endline "To see player 1's cash, enter 'p1 cash'";
-    print_endline "To see player 2's cash, enter 'p2 cash'";
-    print_endline "To go all in, enter 'all in'";
     print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
     print_endline "To quit, type 'quit'.";
     print_endline "To see this list of commands again, type 'help'.";
@@ -155,7 +152,7 @@ let rec loop state : unit =
   |Loop -> loop state
 
 (**designates which command input to follow  **)
-let command_input state = 
+let command_input state mode= 
 
   if (state.turn = -1) 
 
@@ -165,48 +162,45 @@ let command_input state =
     let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in command
 
   (**if AI, inputs are attracted from strategies **)
-  else let command = hard_strat state in command
+  else if mode = "h" then hard_strat state else easy_strat state
 
 
 (**Player vs AI **)
-let rec loop2 state = 
-  if state.hand1 = (Array.of_list []) then loop2 (deal state) else
+let rec loop2 state mode= 
+  if state.hand1 = (Array.of_list []) then loop2 (deal state) mode else
     whose_turn state;
-  let command = command_input state in 
+  let command = command_input state mode in 
   if state.turn = 1 then print_endline ("The AI "^(string_of_command command));
   match command with
-  |Call -> loop2 (new_cards (state) Call)
-  |Check -> loop2 (new_cards state Check)
-  |Fold -> loop2 (fold state)
-  |Bet amount -> if amount<>(-1) then loop2 (bet state amount) else (print_endline "How much do you want to bet?"); loop2 state
-  |Raise amount -> if amount<>(-1) then loop2 (raise state amount) else (print_endline "How much do you want to raise?"); loop2 state
-  |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop2 (buyin state amount)
-                                                else  (print_endline "How much do you want to buy in?"); loop2 state) else print_endline "You must finish this hand before buying in for more" ; loop2 state
+  |Call -> loop2 (new_cards (state) Call) mode
+  |Check -> loop2 (new_cards state Check) mode
+  |Fold -> print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); loop2 (fold state) mode
+  |Bet amount -> if amount<>(-1) then loop2 (bet state amount) mode else (print_endline "How much do you want to bet?"); loop2 state mode
+  |Raise amount -> if amount<>(-1) then loop2 (raise state amount) mode else (print_endline "How much do you want to raise?"); loop2 state mode
+  |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop2 (buyin state amount) mode
+                                                else  (print_endline "How much do you want to buy in?"); loop2 state mode) else print_endline "You must finish this hand before buying in for more" ; loop2 state mode
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
-    print_endline "To raise a bet, type 'raise [amount]', i.e. 'riase $30' will raise the bet by $30.";
+    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
     print_endline "To call, type 'call'.";
     print_endline "To fold, type 'fold'.";
     print_endline "To see player 1's cards, enter 'p1 cards'";
     print_endline "To see player 2's cards, enter 'p2 cards'";
     print_endline "To see the money in the pot, enter 'pot'.";
-    print_endline "To see player 1's cash, enter 'p1 cash'";
-    print_endline "To see player 2's cash, enter 'p2 cash'";
-    print_endline "To go all in, enter 'all in'";
     print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
     print_endline "To quit, type 'quit'.";
     print_endline "To see this list of commands again, type 'help'.";
-    loop2 state
-  |Cards1 -> print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state
-  |Cards2 -> print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state
-  |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); loop2 state
-  |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop2 state
-  |Pot -> print_endline ("$"^string_of_int (state.pot)); loop2 state
+    loop2 state mode
+  |Cards1 -> print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state mode
+  |Cards2 -> print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state mode
+  |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); loop2 state mode
+  |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop2 state mode
+  |Pot -> print_endline ("$"^string_of_int (state.pot)); loop2 state mode
   |Quit -> print_endline "Thanks for playing!" ; exit 0
-  |Clear -> let _ = Sys.command("clear") in (print_endlines 0); (pp_cards state); loop2 state 
-  |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop2 state
-  |AllIn -> loop2 (allin state)
-  |Loop -> loop2 state
+  |Clear -> let _ = Sys.command("clear") in (print_endlines 0); (pp_cards state); loop2 state mode
+  |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop2 state mode
+  |AllIn -> loop2 (allin state) mode
+  |Loop -> loop2 state mode
 
 
 let rec set_buy_in str = 
@@ -258,12 +252,11 @@ let play_game =
   print_endline "To see the money in the pot, enter 'pot'.";
   print_endline "To see player 1's cash, enter 'p1 cash'";
   print_endline "To see player 2's cash, enter 'p2 cash'";
-  print_endline "To go all in, enter 'all in'";
   print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
   print_endline "To quit, type 'quit'.";
   print_endline "To see this list of commands again, type 'help'.";
   print_endline "Player 1 starts. Enjoy the game!";
-  if game_mode = 1 then loop2 (init) else loop (init)
+  if game_mode = 1 then loop2 (init) "h" else loop (init) 
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () =
