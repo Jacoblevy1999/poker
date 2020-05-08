@@ -3,9 +3,9 @@ open OUnit2
 
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
     they are equivalent set-like lists.  That means checking two things.
-                                                               First, they must both be {i set-like}, meaning that they do not
+    First, they must both be {i set-like}, meaning that they do not
     contain any duplicates.  Second, they must contain the same elements,
-                                                                                                                           though not necessarily in the same order. We credit the author of A2.test
+    though not necessarily in the same order. We credit the author of A2.test
     for writing this function. *)
 let cmp_set_like_lists lst1 lst2 =
   let uniq1 = List.sort_uniq compare lst1 in

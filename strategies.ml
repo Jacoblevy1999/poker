@@ -2,6 +2,8 @@ open Poker
 open Command
 open State
 
+(** *)
+
 (** [easy_strat st] is the following move of the computer, given the currrent state.
     For this particularly easy strategy, that means calling all bets, and checking otherwise.*)
 let easy_strat (st:State.t) : Command.move = 
@@ -37,12 +39,15 @@ let chen_strength (in_hand:card list) : int=
   if suited then (ceil highest_val) + 2 - (gap_pts) else
     (ceil highest_val) - (gap_pts)
 
-(** [remove_from_deck card deck] removes [card] from the [deck]*)
+(** [remove_from_deck card deck] removes [card] from the [deck]. *)
 let rec remove_from_deck cards deck = 
   match deck with
   |h::t -> if List.mem h cards then remove_from_deck cards t else h::(remove_from_deck cards t)
   |[] -> []
 
+(** [simulate_hand table hand] is the winner of a simulated hand given a current 
+    [table] and a player's [hand]. Randomly selects remaining cards on the table, as well
+    as the opponent's hand. *)
 let rec simulate_hand (table:Poker.table) (hand:Poker.hand) : int = 
   let used = Array.to_list (Array.concat [table;hand]) in
   let remaining = remove_from_deck used (Array.to_list Poker.full_deck) in
@@ -56,6 +61,10 @@ let rec simulate_hand (table:Poker.table) (hand:Poker.hand) : int =
   else if Array.length table = 3 then let table1 = Poker.river (Array.of_list remaining) table in
     simulate_hand table1 hand else failwith "invalid simulation"
 
+(** [pct_chance wins tries remaining table hand] is the percent chance
+    of a given [hand] winning, given a current [table], as approximated by 
+    iterating through [remaining] simulations and tracking the percentage of 
+    [wins]. *)
 let rec pct_chance wins tries remaining table hand = 
   if remaining = 0 then (float_of_int wins)/.(float_of_int tries) else
   if simulate_hand table hand = 1 then pct_chance (wins+1) (tries+1)
@@ -63,7 +72,7 @@ let rec pct_chance wins tries remaining table hand =
       (remaining-1) table hand
 
 (** [bet_range min max] takes in two ints, [min] and [max],
-    and returns an int between them*)
+    and returns an int between them. *)
 let bet_range min max = 
   Random.self_init();
   min + (Random.int max-min)
@@ -77,8 +86,8 @@ let preflop_bet last pot in_hand : Command.move=
   match last with
   |Some Check
   |None -> if strength >= 10 then Bet (bet_range (pot) (pot*4)) else if strength >= 8
-    then Bet (bet_range (pot/2) (pot*3)) else if strength >= 5
-    then Bet (bet_range (pot/2) (pot*2)) else let r = Random.float 1. in if r < 0.8 then
+    then Bet (bet_range (pot) (pot*5)) else if strength >= 5
+    then Bet (bet_range (pot/2) (pot*4)) else let r = Random.float 1. in if r < 0.8 then
         Check else Bet (bet_range (pot/2) (pot*2))
   | _ -> let r = Random.float 1. in if strength >= 10 then if r > 0.9 then Call else
         Raise (bet_range (pot) (pot*2)) else if strength >= 8
@@ -99,41 +108,19 @@ let hard_strat (st:State.t) : Command.move =
     |Some Check
     |None -> let chance = (pct_chance 0 0 2000 st.table st.hand1) in
       Random.self_init(); let r = Random.float 1. in
-      if chance > 0.85 then Bet (bet_range (st.pot/3) st.pot*4) else 
-      if chance > 0.75 then Bet (bet_range (st.pot/3) st.pot*2) else 
-      if chance > 0.65 then Bet (bet_range (st.pot/4) st.pot) else 
-      if chance > 0.50 then Bet (bet_range (st.pot/8) 2*st.pot/3) else 
+      if chance > 0.85 then if r > 0.85 then Bet (bet_range (st.pot) st.pot*7) 
+        else Bet (bet_range (st.pot/3) st.pot*4) else 
+      if chance > 0.75 then Bet (bet_range (st.pot/3) st.pot*3) else 
+      if chance > 0.65 then Bet (bet_range (st.pot/4) st.pot*2) else 
+      if chance > 0.50 then Bet (bet_range (st.pot/8) st.pot) else 
       if chance < 0.25 then Check else
-      if r > 0.9 then Bet (bet_range (st.pot/3) st.pot*3) else Check
-    |_ -> let chance = (pct_chance 0 0 1000 st.table st.hand1) in
+      if r > 0.8 then Bet (bet_range (st.pot/3) st.pot*4) else Check
+    |_ -> let chance = (pct_chance 0 0 2000 st.table st.hand1) in
       Random.self_init(); let r = Random.float 1. in
       if chance > 0.85 then if r > 0.85 then Call else Raise (bet_range (st.pot/3) st.pot*3) else 
       if chance > 0.75 then if r > 0.4 then Call else Raise (bet_range (st.pot/4) st.pot*2) else 
       if chance > 0.65 then if r > 0.25 then Call else Bet (bet_range (st.pot/4) st.pot) else 
       if chance > 0.50 then if r > 0.4 then Call else 
-        if r > 0.85 then Raise (bet_range (st.pot/8) st.pot) else Fold else
+        if r < 0.25 then Raise (bet_range (st.pot/8) st.pot) else Fold else
       if chance < 0.25 then Fold else
-      if r > 0.9 then Raise (bet_range (st.pot/3) st.pot*3) else Fold
-
-
-(* 
-let ucb (tot_reward:int) (ind_pulls:int) (total_pulls:int) : float =
-  let r = float_of_int tot_reward in
-  let n = float_of_int ind_pulls in
-  let t  = float_of_int total_pulls in
-  (r/.n) +. Float.sqrt (2. *. (Float.log n) /. t) *)
-
-
-(* (** A [gamestate] is a state representing your hand quality,
- *)
-   type gamestate = 
-
-
-   (** A [gametree] is either Leaf, or a Node with a string representing whose turn
-      it is, an int representing *)
-   type gametree = 
-   |Leaf of int
-   |Node of string * int * int * gametree * gametree * gametree * gametree
-
-
-   let create_tree *)
+      if r > 0.75 then Raise (bet_range (st.pot/3) st.pot*3) else Fold

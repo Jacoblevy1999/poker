@@ -5,7 +5,7 @@ type table = card array
 type allseven = card list
 
 
-
+(** [full_deck] represents a full deck of 52 cards. *)
 let (full_deck:deck) = Array.of_list [(0, "h");(1, "h");(2, "h");(3, "h");(4, "h");
                                       (5, "h");(6, "h");(7, "h");(8, "h");(9, "h");
                                       (10, "h");(11, "h");(12, "h");(0, "d");(1, "d");
@@ -17,6 +17,7 @@ let (full_deck:deck) = Array.of_list [(0, "h");(1, "h");(2, "h");(3, "h");(4, "h
                                       (3, "s");(4, "s");(5, "s");(6, "s");(7, "s");(8, "s");(9, "s");
                                       (10, "s");(11, "s");(12, "s")]
 
+(** [shuffle fulldeck acc] is 9 cards randomly selected from [fulldeck].*)
 let rec shuffle (fulldeck: card array) (acc:deck) : deck =
   Random.self_init(); 
   if Array.length acc = 9 then acc else
@@ -24,48 +25,63 @@ let rec shuffle (fulldeck: card array) (acc:deck) : deck =
     shuffle (Array.concat [(Array.sub fulldeck 0 pos);(Array.sub fulldeck (pos+1) ((Array.length fulldeck)-pos-1))]) 
       (Array.of_list (fulldeck.(pos)::(Array.to_list acc)))
 
+(** [deal deck hand] is a tuple representing the cards remaining in [deck],
+    and the 2 cards in a player's [hand] after being dealt. *)
 let rec deal (deck:deck) (hand:hand) : deck * hand = 
   if Array.length hand = 2 then (deck, hand) else
     deal (Array.sub deck 1 (Array.length deck-1)) 
       (Array.of_list (deck.(0)::(Array.to_list hand)))
 
+(** [flop deck table] is a tuple is a tuple representing the cards remaining in [deck],
+    and the cards on the [table] after the flop. *)
 let rec flop (deck:deck) (table:table) : deck * table = 
   if Array.length table = 3 then (deck, table) else
     flop (Array.sub deck 1 (Array.length deck-1)) 
       (Array.concat [(table);(Array.sub deck 0 1)])
 
+(** [turn deck table] is a tuple is a tuple representing the cards remaining in [deck],
+    and the cards on the [table] after the turn. *)
 let turn (deck:deck) (table:table) : deck * table = 
   ((Array.sub deck 1 1),
    (Array.concat [(table);(Array.sub deck 0 1)]))
 
+(** [river deck table] is the cards on the [table] after the river. *)
 let river (deck:deck) (table:table) : table = 
   (Array.concat [(table);(Array.sub deck 0 1)])
 
+(** [freq elt lst acc] is the frequency of [elt] in [lst]. *)
 let rec freq elt lst acc= 
   match lst with 
   | [] -> acc
   |h::t -> if h = elt then freq elt t (acc+1) else freq elt t acc
 
+(** [helper_comp (k1, v1) (k2, v2)] is the inverse of the build in [compare] for 
+    [k1] and [k2]. *)
 let helper_comp (k1, v1) (k2, v2) = 
   (-1)*(compare k1 k2)
 
+(** [suits_in_hand c] is the suits in hand [c]. *)
 let suits_in_hand c= 
   snd (List.split c)
 
+(** [values_in_hand c] is the values in hand [c]. *)
 let rec values_in_hand c= 
   fst (List.split c)
 
-let rec minimum lst acc= 
+(** [minimum lst acc] is the minimum value in [lst]. *)
+let rec minimum (lst:int list) (acc:int) = 
   match lst with 
   |[] -> acc
   |h::t -> if acc=0 then minimum t h else if h<acc then minimum t h
     else minimum t acc
 
+(** [replace lst old n] replaces [old] with [n] in [lst]. *)
 let rec replace lst old n=
   match lst with 
   |(k,v)::t -> if k = old then n::t else (k,v)::(replace t old n)
   |_ -> failwith "not in list"
 
+(** [highest_n n c acc] is the highest [n] values in int list [c]. *)
 let rec highest_n n c acc= 
   match c with
   | [] -> acc
@@ -73,7 +89,8 @@ let rec highest_n n c acc=
       let m = minimum (values_in_hand acc) 0 in 
       if k > m then highest_n n t (replace acc m (k,v)) else highest_n n t acc
 
-let rec add_all_value v (c) acc=
+(** [add_all_value v c acc] is a list of all elements in [c] of value [v]. *)
+let rec add_all_value v c acc=
   match c with
   |[] -> acc
   |(k1,v1)::t -> if k1 = v then add_all_value v t ((k1,v1)::acc) else
@@ -229,17 +246,6 @@ let winner (h1) (h2) (t): string=
       break_mult_group 2 2 (two_pair hand1) (two_pair hand2) else if r=8 then
       break_group 2 (one_pair hand1) (one_pair hand2) else 
       break_high (highest_n 5 hand1 []) (highest_n 5 hand2 [])
-
-
-let d = shuffle full_deck (Array.of_list [])
-let h1 = deal d (Array.of_list [])
-let h2 = deal (fst h1) (Array.of_list [])
-let f = flop (fst h2) (Array.of_list [])
-let t = turn (fst f) (snd f)
-let r = river (fst t) (snd t)
-let fs1 = snd h1
-let fs2 = snd h2
-
 
 let val_dict  = Array.of_list ["two of";"three of";"four of";"five of";"six of";"seven of";
                                "eight of";"nine of";"ten of";"jack of";"queen of";"king of";"ace of"]
