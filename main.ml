@@ -11,6 +11,7 @@ let string_of_command command =
   |Bet n -> "bets $"^(string_of_int n)
   |Raise n -> "raises to $"^(string_of_int n)
   |Buy_in n -> "buys in for $"^(string_of_int n)^"more"
+  |Fold -> "folds"
   |_ -> "is confused"
 
 let whose_turn state = 
