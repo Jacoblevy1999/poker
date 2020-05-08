@@ -273,32 +273,111 @@ let hand_to_input hand =
 
 
 let pp2 input = 
-  "         ___    ___
+  if fst input.(0) = "10" && fst input.(1) = "10" then 
+    "         ___    ___
+        |"^(fst input.(0))^" |  |"^(fst input.(1))^" |  
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|
+        |___|  |___|
+        "
+  else if fst input.(0) = "10" && fst input.(1) <> "10" then
+    "         ___    ___
+        |"^(fst input.(0))^" |  |"^(fst input.(1))^"  |  
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|
+        |___|  |___|
+        "
+  else if fst input.(0) <> "10" && fst input.(1) = "10" then
+    "         ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^" |  
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|
+        |___|  |___|
+        "
+  else
+    "         ___    ___
         |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  
         |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|
         |___|  |___|
         "
 
 let pp3 input = 
+  let a = fst input.(0) in 
+  let b = fst input.(1) in 
+  let c = fst input.(2) in
+  let a1 = match a with 
+    |"10" -> a^" |" |_ -> a^"  |" in
+  let b1 = match b with 
+    |"10" -> b^" |" |_ -> b^"  |" in
+  let c1 = match c with 
+    |"10" -> c^" |" |_ -> c^"  |" in 
   "         ___    ___    ___
-        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |
+        |"^a1^"  |"^b1^"  |"^c1^"
         |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|
         |___|  |___|  |___|
         "
 
-let pp4 input =
+let pp4 input = 
+  let a = fst input.(0) in 
+  let b = fst input.(1) in 
+  let c = fst input.(2) in
+  let d = fst input.(3) in
+  let a1 = match a with 
+    |"10" -> a^" |" |_ -> a^"  |" in
+  let b1 = match b with 
+    |"10" -> b^" |" |_ -> b^"  |" in
+  let c1 = match c with 
+    |"10" -> c^" |" |_ -> c^"  |" in 
+  let d1 = match d with
+    |"10" -> d^" |" |_ -> d^"  |" in 
   "         ___    ___    ___    ___
-        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |
+        |"^a1^"  |"^b1^"  |"^c1^"  |"^d1^"
         |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|
         |___|  |___|  |___|  |___|
         "
 
 let pp5 input = 
+  let a = fst input.(0) in 
+  let b = fst input.(1) in 
+  let c = fst input.(2) in
+  let d = fst input.(3) in
+  let e = fst input.(4) in 
+  let a1 = match a with 
+    |"10" -> a^" |" |_ -> a^"  |" in
+  let b1 = match b with 
+    |"10" -> b^" |" |_ -> b^"  |" in
+  let c1 = match c with 
+    |"10" -> c^" |" |_ -> c^"  |" in 
+  let d1 = match d with
+    |"10" -> d^" |" |_ -> d^"  |" in 
+  let e1 = match e with 
+    |"10" -> e^" |" |_ -> e^"  |" in 
   "         ___    ___    ___    ___    ___
-        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |  |"^(fst input.(4))^"  |
+        |"^a1^"  |"^b1^"  |"^c1^"  |"^d1^"  |"^e1^"
         |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|  |  "^(snd input.(4))^"|
         |___|  |___|  |___|  |___|  |___|
         "
+
+(* OLD PP3 *)
+(* let pp3 input = 
+   "         ___    ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|
+        |___|  |___|  |___|
+        " *)
+
+(* OLD PP4 *)
+(* let pp4 input =
+   "         ___    ___    ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|
+        |___|  |___|  |___|  |___|
+        " *)
+
+(* OLD PP5 *)
+(* let pp5 input = 
+   "         ___    ___    ___    ___    ___
+        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |  |"^(fst input.(4))^"  |
+        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|  |  "^(snd input.(4))^"|
+        |___|  |___|  |___|  |___|  |___|
+        " *)
 
 
 
