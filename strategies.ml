@@ -153,7 +153,7 @@ let hard_strat (st:State.t) : Command.move =
       |Some Check
       |None -> 
         Random.self_init(); let r = Random.float 1. in
-        if chance > 0.85 then if r > 0.85 then Bet (bet_range (st.pot) st.pot*5) 
+        if chance > 0.85 then if r > 0.85 then legal_bet st (bet_range (st.pot) st.pot*5) 
           else Bet (bet_range (st.pot/3) st.pot*4) else 
         if chance > 0.75 then legal_bet st (bet_range (st.pot/3) st.pot*3) else 
         if chance > 0.65 then legal_bet st (bet_range (st.pot/4) st.pot*2) else 
