@@ -569,9 +569,11 @@ let allin st =
    (**player 1 turn, matches the max amount of previous bet it can **)
    |1 -> 
 
-     (**if player 1 is going all in, check to see if they are going all in for
-        more than the previous bet and that previous cash is 0, if so triggers 
-        error message **)
+     if (st.cash1 = 0) then (print_endline "You are already all in"; st ) else 
+
+       (**if player 1 is going all in, check to see if they are going all in for
+          more than the previous bet and that previous cash is 0, if so triggers 
+          error message **)
      if (st.cash2 = 0 && st.previous_bet < st.cash1) then (print_endline "Player 1 is all in" ;  (call st)) 
      else (
 
@@ -625,6 +627,9 @@ let allin st =
          } )
 
    |_ -> 
+
+     if (st.cash2 = 0) then (print_endline "You are already all in"; st ) else 
+
      if (st.cash1 = 0 && st.previous_bet < st.cash2) then (print_endline "Player 2 is all in" ;  (call st)) 
 
      else (
@@ -687,6 +692,38 @@ let allin st =
 
 (**Helper FUnction for Mail to determine if time to update new cards **)
 
+(**helper function that calls new cards, helps new_cards when matched **)
+let newcards_helper st cmd = 
+  match st.stage with 
+  |1 -> (match cmd with
+      | Call -> flop (call st)
+      | Check -> flop st
+      | AllIn -> flop (allin st)
+      | _ -> st)
+  |2 -> (match cmd with
+      | Call -> turn (call st)
+      | Check -> turn st
+      | AllIn -> turn (allin st)
+      | _ -> st)
+  |3 -> (match cmd with
+      | Call -> river (call st)
+      | Check -> river st
+      | AllIn -> river (allin st)
+      | _ -> st)
+  |4 -> (match cmd with
+      | Call -> winner (call st)
+      | Check -> winner st
+      | AllIn -> winner (allin st)
+      | _ -> st)
+  | _ -> st
+
+(**returns [true] if all in next cards are triggered, [false] otherwise **)
+let allin_helper st = 
+  (match st.previous_move with 
+   | [] -> false 
+   | h::t -> (match h with 
+       | Bet int -> true 
+       | _ -> false))
 
 (**input a state and outputs either
    [new state] with updated cards from flop, deal, turn, river, or returns 
@@ -703,55 +740,26 @@ let new_cards st cmd =
                 | 1 -> if st.previous_bet > st.cash1 then true else false
                 | _ -> if st.previous_bet > st.cash2 then true else false)
              then (call st)
-             else 
-               match st.stage with 
-               | 1 -> flop (call st)
-               | 2 -> turn (call st)
-               | 3 -> river (call st)
-               | 4 -> winner (call st)
-               | _ -> (call st)
-            )
+             else newcards_helper (st) (Call) )
+
 
 
   (**If action is Check, then checks to see if previous move was also Check, if
      not then returns original state, if it is then return updated state **)
   | Check -> if st.previous_move <> [Check] then check st else (
-      match st.stage with 
-      | 1 -> flop st
-      | 2 -> turn st 
-      | 3 -> river st
-      | 4 -> winner st
-      | _ -> st
+      newcards_helper (st) (Check)
     )
 
   (**If action is AllIn, then checks to see if previous move was also
      an AllIn, if not then returns original state with [AllIn] applied **)
   | AllIn -> (
       match st.turn with 
-      | 1 -> if ((match st.previous_move with 
-          | [] -> false 
-          | h::t -> (match h with 
-              | Bet int -> true 
-              | _ -> false)) && st.cash2 = 0)
-        then (match st.stage with 
-            | 1 -> flop (allin st)
-            | 2 -> turn (allin st) 
-            | 3 -> river (allin st)
-            | 4 -> winner (allin st)
-            | _ -> allin st)
+      | 1 -> if (allin_helper st && st.cash2 = 0)
+        then (newcards_helper (st) (AllIn))
         else (allin st)
 
-      |_ -> if ((match st.previous_move with 
-          | [] -> false 
-          | h::t -> (match h with 
-              | Bet int -> true 
-              | _ -> false)) && st.cash1 = 0)
-        then (match st.stage with 
-            | 1 -> flop (allin st)
-            | 2 -> turn (allin st) 
-            | 3 -> river (allin st)
-            | 4 -> winner (allin st)
-            | _ -> allin st)
+      |_ -> if (allin_helper st && st.cash1 = 0)
+        then (newcards_helper (st) (AllIn))
         else (allin st)
 
     )
