@@ -4,6 +4,7 @@ open Command
 open Strategies
 
 
+
 let string_of_command command = 
   match command with
   |Check -> "checks"
@@ -135,8 +136,9 @@ let rec loop state : unit =
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop state
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop state
   |Quit -> print_endline "Thanks for playing!" ; exit 0
-  |Clear -> let _ = Sys.command("clear") in loop state 
+  |Clear -> let _ = Sys.command("clear") in  loop state 
   |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop state
+  |AllIn -> loop state
   |Loop -> loop state
 
 (**designates which command input to follow  **)
@@ -187,6 +189,7 @@ let rec loop2 state =
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Clear -> let _ = Sys.command("clear") in loop2 state 
   |Deal -> print_endline "Invalid Command. Enter 'help' for list of moves"; loop2 state
+  |AllIn -> loop state
   |Loop -> loop2 state
 
 
