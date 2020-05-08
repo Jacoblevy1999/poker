@@ -219,7 +219,13 @@ let rec set_game_mode str =
   print_string "> ";
   let game_mode = read_line () in
   if game_mode = "quit" then begin print_endline "Thanks for playing!" ; exit 0 end
-  else if game_mode = "cpu" then 1 else if game_mode = "human" then 2 else
+  else if game_mode = "cpu" then 
+    print_endline "Would you like to play on 'easy' or 'hard'?"; 
+  print_string "> ";
+  let level = read_line () in 
+  if level = "quit" then begin print_endline "Thanks for playing!" ; exit 0 end
+  else if level = "easy" then 11 else if level = "hard" then 12 else
+  if game_mode = "human" then 2 else
     set_game_mode ""
 
 let rec set_ante str = 
@@ -256,7 +262,8 @@ let play_game =
   print_endline "To quit, type 'quit'.";
   print_endline "To see this list of commands again, type 'help'.";
   print_endline "Player 1 starts. Enjoy the game!";
-  if game_mode = 1 then loop2 (init) "h" else loop (init) 
+  if game_mode = 12 then loop2 (init) "h" else if game_mode = 11 then loop2 (init) "e"
+  else loop (init) 
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () =
