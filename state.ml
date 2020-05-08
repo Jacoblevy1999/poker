@@ -728,9 +728,11 @@ let new_cards st cmd =
      an AllIn, if not then returns original state with [AllIn] applied **)
   | AllIn -> (
       match st.turn with 
-      | 1 -> if ((match (List.hd st.previous_move) with 
-          | Bet int -> true 
-          | _ -> false ) && st.cash2 = 0)
+      | 1 -> if ((match st.previous_move with 
+          | [] -> false 
+          | h::t -> (match h with 
+              | Bet int -> true 
+              | _ -> false)) && st.cash2 = 0)
         then (match st.stage with 
             | 1 -> flop (allin st)
             | 2 -> turn (allin st) 
@@ -739,9 +741,11 @@ let new_cards st cmd =
             | _ -> allin st)
         else (allin st)
 
-      |_ -> if ((match (List.hd st.previous_move) with 
-          | Bet int -> true 
-          | _ -> false ) && st.cash1 = 0)
+      |_ -> if ((match st.previous_move with 
+          | [] -> false 
+          | h::t -> (match h with 
+              | Bet int -> true 
+              | _ -> false)) && st.cash1 = 0)
         then (match st.stage with 
             | 1 -> flop (allin st)
             | 2 -> turn (allin st) 
@@ -757,6 +761,7 @@ let new_cards st cmd =
   | _ -> st
 
 
+(** List.hd is not working **)
 
 
 
