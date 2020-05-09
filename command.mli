@@ -23,6 +23,8 @@ type move =
   |Deal
   |Loop
 
+(** [] *)
+exception Invalid_move
 
 (** [remove_dsign str] takes in a string and returns an int of the string, or 
     returns [-1] if the string isn't of the form ["int"] or ["$int"] where "int"

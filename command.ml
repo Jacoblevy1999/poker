@@ -22,9 +22,6 @@ type move =
   |Deal
   |Loop
 
-
-
-exception Empty 
 exception Invalid_move 
 
 (** [str_to_strlst_helper str] returns the list of strings with all spaces and empty 
