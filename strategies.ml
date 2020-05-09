@@ -20,8 +20,7 @@ let legal_call st : Command.move =
       | 1 -> st.previous_bets_2
       | _ -> st.previous_bets_1) > st.cash1 then AllIn else Call
 
-(** [easy_strat st] is the following move of the computer, given the currrent state.
-    For this particularly easy strategy, that means calling all bets, and checking otherwise.*)
+
 let easy_strat (st:State.t) : Command.move = 
   if st.previous_move = [] then Check else 
     match List.hd st.previous_move with
@@ -144,8 +143,6 @@ let reactionary_bet chance st =
   if heuristic < 1.15 then Fold else
   if r > 0.85 then legal_raise st (bet_range (st.pot/3) st.pot*3) else Fold
 
-(** [hard_strat st] is the following move of the computer, given the currrent state,
-    according to an informed betting strategy. *)
 let hard_strat (st:State.t) : Command.move = 
   if st.cash1 = 0 then Check else
     let last = if st.previous_move = [] then None else
