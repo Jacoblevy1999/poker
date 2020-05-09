@@ -77,4 +77,11 @@ val pp5 : (string * string) array -> string
 
 (** [ values_in_hand c] returns the values of the cards that players have in 
     their hand. *)
-val  values_in_hand : ('a * 'b) list -> 'a list
+val  values_in_hand : allseven -> int list
+
+(** [ suits_in_hand c] returns the suits of the cards that players have in 
+    their hand. *)
+val suits_in_hand : allseven -> string list
+
+(** [pairs c acc] is a list of all the pairs in [c]. *)
+val pairs : allseven -> allseven -> allseven
