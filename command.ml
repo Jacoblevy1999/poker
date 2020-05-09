@@ -1,7 +1,9 @@
 type move = 
-  (* Calling is matching the amount that has been put in by another player in the form of a bet or a raise. *)
+  (* Calling is matching the amount that has been put in by another player in 
+     the form of a bet or a raise. *)
   |Call
-  (* Checking is what one does if they wish to pass the action to the next player, but keep their cards. *)
+  (* Checking is what one does if they wish to pass the action to the next
+     player, but keep their cards. *)
   |Check
   (* Folding is not betting and discarding cards, out till next hand. *)
   |Fold 
@@ -24,8 +26,8 @@ type move =
 
 exception Invalid_move 
 
-(** [str_to_strlst_helper str] returns the list of strings with all spaces and empty 
-    strings removed. The list is in the same order as the original string.
+(** [str_to_strlst_helper str] returns the list of strings with all spaces and 
+    empty strings removed. The list is in the same order as the original string.
     Requires: strlst is a list of strings *)
 let str_to_strlst_helper strlst = 
   let rec aux acc = function
