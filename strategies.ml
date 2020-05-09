@@ -112,12 +112,12 @@ let preflop_bet st last pot in_hand : Command.move=
           | 1 -> st.previous_bets_2
           | _ -> st.previous_bets_1)) /. (float_of_int st.pot) in
       let heuristic = 3 * strength - (int_of_float (bet_prop *. 10.)) in
-      if heuristic >= 25 then if r > 0.9 then legal_call st else
-          legal_raise st (bet_range (pot) (pot*2)) else if heuristic >= 21
+      if heuristic >= 24 then if r > 0.9 then legal_call st else
+          legal_raise st (bet_range (pot) (pot*2)) else if heuristic >= 19
       then if r > 0.75 then legal_raise st (bet_range (pot) (pot*2))
-        else legal_call st else if heuristic >= 17
+        else legal_call st else if heuristic >= 14
       then if r > 0.9 then legal_raise st (bet_range (pot) (pot*2))
-        else if r > 0.85 then Fold else legal_call st else if heuristic < 11 then Fold else if r < 0.75 then
+        else if r > 0.85 then Fold else legal_call st else if heuristic < 9 then Fold else if r < 0.75 then
         Fold else legal_call st
 
 (** [reactionary_bet chance st] is the action taken by the computer in response
