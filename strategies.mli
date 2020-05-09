@@ -3,7 +3,6 @@
 open Poker
 open State
 open Command
-open Strategies
 
 (** [easy_strat st] is the following move of the computer, given the 
     currrent state. For this particularly easy strategy, that means calling 
