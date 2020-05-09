@@ -1,3 +1,4 @@
+
 type card = (int * string)
 type deck = card array
 type hand = card array
@@ -17,35 +18,27 @@ let (full_deck:deck) = Array.of_list [(0, "h");(1, "h");(2, "h");(3, "h");(4, "h
                                       (3, "s");(4, "s");(5, "s");(6, "s");(7, "s");(8, "s");(9, "s");
                                       (10, "s");(11, "s");(12, "s")]
 
-(** [shuffle fulldeck acc] is 9 cards randomly selected from [fulldeck].*)
-let rec shuffle (fulldeck: card array) (acc:deck) : deck =
+let rec shuffle (fulldeck: deck) (acc:deck) : deck =
   Random.self_init(); 
   if Array.length acc = 9 then acc else
     let pos = Random.int (Array.length fulldeck) in 
     shuffle (Array.concat [(Array.sub fulldeck 0 pos);(Array.sub fulldeck (pos+1) ((Array.length fulldeck)-pos-1))]) 
       (Array.of_list (fulldeck.(pos)::(Array.to_list acc)))
 
-(** [deal deck hand] is a tuple representing the cards remaining in [deck],
-    and the 2 cards in a player's [hand] after being dealt. *)
 let rec deal (deck:deck) (hand:hand) : deck * hand = 
   if Array.length hand = 2 then (deck, hand) else
     deal (Array.sub deck 1 (Array.length deck-1)) 
       (Array.of_list (deck.(0)::(Array.to_list hand)))
 
-(** [flop deck table] is a tuple is a tuple representing the cards remaining in [deck],
-    and the cards on the [table] after the flop. *)
 let rec flop (deck:deck) (table:table) : deck * table = 
   if Array.length table = 3 then (deck, table) else
     flop (Array.sub deck 1 (Array.length deck-1)) 
       (Array.concat [(table);(Array.sub deck 0 1)])
 
-(** [turn deck table] is a tuple is a tuple representing the cards remaining in [deck],
-    and the cards on the [table] after the turn. *)
 let turn (deck:deck) (table:table) : deck * table = 
   ((Array.sub deck 1 1),
    (Array.concat [(table);(Array.sub deck 0 1)]))
 
-(** [river deck table] is the cards on the [table] after the river. *)
 let river (deck:deck) (table:table) : table = 
   (Array.concat [(table);(Array.sub deck 0 1)])
 
