@@ -74,7 +74,6 @@ let rec replace lst old n=
   |(k,v)::t -> if k = old then n::t else (k,v)::(replace t old n)
   |_ -> failwith "not in list"
 
-(** [highest_n n c acc] is the highest [n] values in int list [c]. *)
 let rec highest_n n c acc= 
   match c with
   | [] -> acc
@@ -120,7 +119,8 @@ let rec best_four_kind (c) (acc)=
 let best_straight (c) (acc)=
   let rec straight_sorter lst acc = 
     match lst with
-    |[] -> if List.length acc >= 5 then (Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 5))
+    |[] -> if List.length acc > 5 then highest_n 5 acc []
+      else if List.length acc >= 5 then (Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 5))
       else if List.length acc = 4 && List.mem 0 (values_in_hand acc) && List.mem 12 (values_in_hand c) then 
         (List.hd (add_all_value 12 c []))::(Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 4))
       else []

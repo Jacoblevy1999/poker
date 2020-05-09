@@ -30,29 +30,29 @@ type move =
 exception Empty 
 exception Invalid_move 
 
-(* [parse_helper str] returns the list of strings with all spaces and empty 
-   strings removed. The list is in the same order as the original string.
-   Requires: strlst is a list of strings *)
+(** [parse_helper str] returns the list of strings with all spaces and empty 
+    strings removed. The list is in the same order as the original string.
+    Requires: strlst is a list of strings *)
 let str_to_strlst_helper strlst = 
   let rec aux acc = function
     |[] -> List.rev acc
     |h::t -> if h="" || h=" " then aux acc t  else aux (h::acc) t
   in aux [] strlst
 
-(* [str_to_strlst str] splits a string at the spaces then returns a lsit of 
-   strings with all spaces and empty strings removed.
-   Requires: str is a string.   *)
+(** [str_to_strlst str] splits a string at the spaces then returns a lsit of 
+    strings with all spaces and empty strings removed.
+    Requires: str is a string.   *)
 let str_to_strlst str = 
   let str_lst = String.split_on_char ' ' str in
   str_to_strlst_helper str_lst
 
-(** is_phrase_wellformed move_phrase] returns true if [move_phrase] 
+(** [is_phrase_wellformed move_phrase] returns true if [move_phrase] 
     satisfies the ctriteria given below, raises an error otherwise. 
     Criteria: Each element of the list represents a word of the move 
     phrase, where a {i word} is defined as a consecutive sequence of non-space 
     characters.
 
-    An [move_phrase] is not permitted to be the empty list. *)
+    A [move_phrase] is not permitted to be the empty list. *)
 let rec is_phrase_wellformed strlst = 
   match strlst with 
   |[] -> true

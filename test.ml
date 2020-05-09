@@ -1,6 +1,32 @@
 open Poker
 open OUnit2
 
+
+(** TESTING STRATEGY: Our testing strategy revolved mostly around testing the
+    functions from the [Poker] module in OUnit, and then play testing the remainder 
+    of the game. We thought this to be prudent, as we could not realistically
+    play enough poker to catch all of the crazy edge cases (something like an Ace-low
+    flush, for examply, is incredibly rare) that occur in evaluating a winner in poker. 
+    However, we felt we could play-test sufficiently, as to capture all possible 
+    player actions in this two-player game. So, for the test cases done in OUnit, 
+    all of which were from the [Poker] module, we went with a black-box testing 
+    procedure. We first wanted to make sure that hands that were a certain "pattern"
+    evaluated correctly for their appropriate functions (ie a hand that is a 
+    flush, evaluated by the [best_flush] function, returns the cards that form a flush).
+    After that, we then wanted to make sure that the appropriate [winner] is selected,
+    and tested that function extensively to ensure that all edge cases we could think of
+    (as well as normal cases) were covered. For play testing, our strategy was more
+    glass-box, as we tried to go through and do every command (and combination of
+    commands) that would hit every line of code we wrote in [state], [main], and
+    command. Lastly, to test [strategies], we mainly just played the game, and 
+    made sure the AI was making reasonable choices. Since its actions are probabilistic,
+    we could only hope for it to be somewhat reasonable, and legal, which it was. 
+    Overall, we believe this to show the correctness of our system, as between the things
+    we tested in OUnit and those we playtested, we tested all possible things that could
+    happen in a poker game. *)
+
+
+
 (** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
     they are equivalent set-like lists.  That means checking two things.
     First, they must both be {i set-like}, meaning that they do not
@@ -26,6 +52,7 @@ let cmp_set_like_lists lst1 lst2 =
    name >:: (fun _ -> 
       (* the [printer] tells OUnit how to convert the output to a string *)
       assert_equal expected_output (winner h1 h2 t)) *)
+
 let hand i1 i2 = 
   (Array.concat [(Array.sub full_deck i1 1);(Array.sub full_deck i2 1)])
 
@@ -51,8 +78,26 @@ let b_five_lst i1 i2 i3 i4 i5 =
                                (Array.sub full_deck i3 1);(Array.sub full_deck i4 1);(Array.sub full_deck i5 1)])
 
 let tests = "poker test suite" >::: [
-    "flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
-                                                (b_five_lst 11 12 9 10 8) (highest_n 5 (table_lst 1 2 8 9 10 11 12) [])));
+    "highest 5"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
+                                                    (b_five_lst 11 12 9 10 8) (highest_n 5 (table_lst 1 2 8 9 10 11 12) [])));
+    "not a flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
+                                                      ([]) (best_flush (table_lst 1 13 14 2 44 45 46))));
+    "hearts flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
+                                                       (b_five_lst 12 11 5 3 2) (best_flush (table_lst 12 11 3 2 5 45 46))));
+    "diamonds flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
+                                                         (b_five_lst 13 15 17 16 22) (best_flush (table_lst 22 16 17 13 5 15 40))));
+    "clubs flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
+                                                      (b_five_lst 30 35 32 37 29) (best_flush (table_lst 29 37 32 35 1 2 30))));
+    "indifferent to order"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
+                                                               (b_five_lst 12 11 5 3 2) (best_flush (table_lst 11 3 12 2 41 45 5))));
+    "indifferent to order"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
+                                                               (b_five_lst 12 11 5 3 2) (best_flush (table_lst 3 45 12 2 41 11 5))));
+    "not a straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists ([]) (best_straight (table_lst 1 2 7 10 12 8 6) [])));
+    "straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 12 3 28 40 0) (best_straight (table_lst 40 28 3 35 20 12 0) [])));
+    "straight flush is straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) (best_straight (table_lst 1 2 3 5 4 22 23) [])));
+    "straight flush is flush" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) (best_flush (table_lst 1 2 3 5 4 22 23))));
+    "ace-low straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 1 2 3 4 0) (best_straight (table_lst 1 2 3 0 4 22 23) [])));
+    "higher straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) (best_straight (table_lst 1 2 3 0 4 5 23) [])));
     "on the board" >:: (fun _ -> assert_equal "tie" (winner (hand 12 11) (hand 10 9) (b_five 0 1 2 3 4)));
     "high card same 2 pair" >:: (fun _ -> assert_equal "player 1" (winner (hand 48 51) (hand 50 49) (b_five 0 1 3 14 13)));
     "flush beats straight" >:: (fun _ -> assert_equal "player 1" (winner (hand 0 10) (hand 50 49) (b_five 0 1 3 14 13)));
@@ -60,9 +105,12 @@ let tests = "poker test suite" >::: [
     "order on table doesn't matter" >:: (fun _ -> assert_equal "player 2" (winner (hand 0 51) (hand 20 21) (b_five 6 5 13 14 4)));
     "better full house" >:: (fun _ -> assert_equal "player 2" (winner (hand 0 38) (hand 1 25) (b_five 51 12 14 13 35)));
     "pair with higher cards" >:: (fun _ -> assert_equal "player 1" (winner (hand 38 4) (hand 19 3) (b_five 12 23 22 47 0)));
-    "straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 12 3 28 40 0) (best_straight (table_lst 40 28 3 35 20 12 0) [])));
+
     "straight beats 2 pair" >:: (fun _ -> assert_equal "player 1" (winner (hand 40 28) (hand 51 9) (b_five 12 35 3 17 0)));
-    "ace low straight" >:: (fun _ -> assert_equal "player 1" (winner (hand 40 28) (hand 51 9) (b_five 12 35 3 50 0)));
+    "ace low straight unsuited" >:: (fun _ -> assert_equal "player 1" (winner (hand 40 28) (hand 51 9) (b_five 12 35 3 50 0)));
+    "high card tie" >:: (fun _ -> assert_equal "tie" (winner (hand 1 11) (hand 14 24) (b_five 45 46 50 23 20)));
+    "flush on board tie" >:: (fun _ -> assert_equal "tie" (winner (hand 1 11) (hand 14 24) (b_five 43 45 48 50 51)));
+    "better flush" >:: (fun _ -> assert_equal "player 1" (winner (hand 1 51) (hand 14 42) (b_five 43 45 48 50 49)));
   ]
 
 
