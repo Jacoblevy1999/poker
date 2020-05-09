@@ -78,39 +78,102 @@ let b_five_lst i1 i2 i3 i4 i5 =
                                (Array.sub full_deck i3 1);(Array.sub full_deck i4 1);(Array.sub full_deck i5 1)])
 
 let tests = "poker test suite" >::: [
-    "highest 5"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
-                                                    (b_five_lst 11 12 9 10 8) (highest_n 5 (table_lst 1 2 8 9 10 11 12) [])));
-    "not a flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
-                                                      ([]) (best_flush (table_lst 1 13 14 2 44 45 46))));
-    "hearts flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
-                                                       (b_five_lst 12 11 5 3 2) (best_flush (table_lst 12 11 3 2 5 45 46))));
-    "diamonds flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
-                                                         (b_five_lst 13 15 17 16 22) (best_flush (table_lst 22 16 17 13 5 15 40))));
-    "clubs flush"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
-                                                      (b_five_lst 30 35 32 37 29) (best_flush (table_lst 29 37 32 35 1 2 30))));
-    "indifferent to order"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
-                                                               (b_five_lst 12 11 5 3 2) (best_flush (table_lst 11 3 12 2 41 45 5))));
-    "indifferent to order"  >:: (fun _ -> assert_equal true (cmp_set_like_lists 
-                                                               (b_five_lst 12 11 5 3 2) (best_flush (table_lst 3 45 12 2 41 11 5))));
-    "not a straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists ([]) (best_straight (table_lst 1 2 7 10 12 8 6) [])));
-    "straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 12 3 28 40 0) (best_straight (table_lst 40 28 3 35 20 12 0) [])));
-    "straight flush is straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) (best_straight (table_lst 1 2 3 5 4 22 23) [])));
-    "straight flush is flush" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) (best_flush (table_lst 1 2 3 5 4 22 23))));
-    "ace-low straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 1 2 3 4 0) (best_straight (table_lst 1 2 3 0 4 22 23) [])));
-    "higher straight" >:: (fun _ -> assert_equal true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) (best_straight (table_lst 1 2 3 0 4 5 23) [])));
-    "on the board" >:: (fun _ -> assert_equal "tie" (winner (hand 12 11) (hand 10 9) (b_five 0 1 2 3 4)));
-    "high card same 2 pair" >:: (fun _ -> assert_equal "player 1" (winner (hand 48 51) (hand 50 49) (b_five 0 1 3 14 13)));
-    "flush beats straight" >:: (fun _ -> assert_equal "player 1" (winner (hand 0 10) (hand 50 49) (b_five 0 1 3 14 13)));
-    "straight beats pair" >:: (fun _ -> assert_equal "player 2" (winner (hand 0 51) (hand 20 21) (b_five 4 5 6 14 13)));
-    "order on table doesn't matter" >:: (fun _ -> assert_equal "player 2" (winner (hand 0 51) (hand 20 21) (b_five 6 5 13 14 4)));
-    "better full house" >:: (fun _ -> assert_equal "player 2" (winner (hand 0 38) (hand 1 25) (b_five 51 12 14 13 35)));
-    "pair with higher cards" >:: (fun _ -> assert_equal "player 1" (winner (hand 38 4) (hand 19 3) (b_five 12 23 22 47 0)));
+    "highest 5"  >:: (fun _ -> assert_equal 
+                         true (cmp_set_like_lists 
+                                 (b_five_lst 11 12 9 10 8) 
+                                 (highest_n 5 (table_lst 1 2 8 9 10 11 12) [])));
+    "not a flush"  >:: (fun _ -> assert_equal 
+                           true (cmp_set_like_lists 
+                                   ([]) 
+                                   (best_flush (table_lst 1 13 14 2 44 45 46))));
+    "hearts flush"  >:: (fun _ -> assert_equal 
+                            true (cmp_set_like_lists 
+                                    (b_five_lst 12 11 5 3 2) 
+                                    (best_flush (table_lst 12 11 3 2 5 45 46))));
+    "diamonds flush"  >:: (fun _ -> assert_equal 
+                              true (cmp_set_like_lists 
+                                      (b_five_lst 13 15 17 16 22) 
+                                      (best_flush (table_lst 22 16 17 13 5 15 40))));
+    "clubs flush"  >:: (fun _ -> assert_equal 
+                           true (cmp_set_like_lists 
+                                   (b_five_lst 30 35 32 37 29) 
+                                   (best_flush (table_lst 29 37 32 35 1 2 30))));
+    "indifferent to order"  >:: (fun _ -> assert_equal 
+                                    true (cmp_set_like_lists 
+                                            (b_five_lst 12 11 5 3 2) 
+                                            (best_flush (table_lst 11 3 12 2 41 45 5))));
+    "indifferent to order"  >:: (fun _ -> assert_equal 
+                                    true (cmp_set_like_lists 
+                                            (b_five_lst 12 11 5 3 2) 
+                                            (best_flush (table_lst 3 45 12 2 41 11 5))));
+    "not a straight" >:: (fun _ -> assert_equal 
+                             true (cmp_set_like_lists ([]) 
+                                     (best_straight (table_lst 1 2 7 10 12 8 6) [])));
+    "straight" >:: (fun _ -> assert_equal 
+                       true (cmp_set_like_lists (b_five_lst 12 3 28 40 0) 
+                               (best_straight (table_lst 40 28 3 35 20 12 0) [])));
+    "straight flush is straight" >:: (fun _ -> assert_equal 
+                                         true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) 
+                                                 (best_straight (table_lst 1 2 3 5 4 22 23) [])));
+    "straight flush is flush" >:: (fun _ -> assert_equal 
+                                      true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) 
+                                              (best_flush (table_lst 1 2 3 5 4 22 23))));
+    "ace-low straight" >:: (fun _ -> assert_equal 
+                               true (cmp_set_like_lists (b_five_lst 1 2 3 4 0) 
+                                       (best_straight (table_lst 1 2 3 0 4 22 23) [])));
+    "higher straight" >:: (fun _ -> assert_equal 
+                              true (cmp_set_like_lists (b_five_lst 1 2 3 4 5) 
+                                      (best_straight (table_lst 1 2 3 0 4 5 23) [])));
+    "on the board" >:: (fun _ -> assert_equal 
+                           "tie" (winner (hand 12 11) (hand 10 9) (b_five 0 1 2 3 4)));
+    "high card same 2 pair" >:: (fun _ -> assert_equal 
+                                    "player 1" (winner (hand 48 51)
+                                                  (hand 50 49) (b_five 0 1 3 14 13)));
+    "flush beats straight" >:: (fun _ -> assert_equal 
+                                   "player 1" (winner (hand 0 10) (hand 50 49) 
+                                                 (b_five 0 1 3 14 13)));
+    "straight beats pair" >:: (fun _ -> assert_equal 
+                                  "player 2" (winner (hand 0 51) (hand 20 21) 
+                                                (b_five 4 5 6 14 13)));
+    "order on table doesn't matter" >:: (fun _ -> assert_equal 
+                                            "player 2" (winner (hand 0 51) (hand 20 21) 
+                                                          (b_five 6 5 13 14 4)));
+    "better full house" >:: (fun _ -> assert_equal "player 2" 
+                                (winner (hand 0 38) (hand 1 25) (b_five 51 12 14 13 35)));
+    "pair with higher cards" >:: (fun _ -> assert_equal "player 1" 
+                                     (winner (hand 38 4) (hand 19 3) (b_five 12 23 22 47 0)));
+    "straight beats 2 pair" >:: (fun _ -> assert_equal "player 1" 
+                                    (winner (hand 40 28) (hand 51 9) (b_five 12 35 3 17 0)));
+    "ace low straight unsuited" >:: (fun _ -> assert_equal "player 1" 
+                                        (winner (hand 40 28) (hand 51 9) (b_five 12 35 3 50 0)));
+    "high card tie" >:: (fun _ -> assert_equal "tie" 
+                            (winner (hand 1 11) (hand 14 24) (b_five 45 46 50 23 20)));
+    "flush on board tie" >:: (fun _ -> assert_equal "tie" 
+                                 (winner (hand 1 11) (hand 14 24) (b_five 43 45 48 50 51)));
+    "better flush" >:: (fun _ -> assert_equal "player 1" 
+                           (winner (hand 1 51) (hand 14 42) (b_five 43 45 48 50 49)));
+    "royal flush better" >:: (fun _ -> assert_equal "player 1" 
+                                 (winner (hand 1 51) (hand 14 46) (b_five 45 47 48 50 49)));
+    "tie royal flush" >:: (fun _ -> assert_equal "tie" 
+                              (winner (hand 1 46) (hand 14 42) (b_five 51 50 49 48 47)));
+    "better 3 kind" >:: (fun _ -> assert_equal "player 1" 
+                            (winner (hand 1 14) (hand 0 13) (b_five 51 50 26 27 49)));
+    "better full house" >:: (fun _ -> assert_equal "player 1" 
+                                (winner (hand 1 14) (hand 0 13) (b_five 12 25 26 27 49)));
+    "FH indifferent to order" >:: (fun _ -> assert_equal "player 2" 
+                                      (winner (hand 13 0) (hand 1 14) (b_five 49 25 27 26 12)));
+    "best FH is on table" >:: (fun _ -> assert_equal "tie" 
+                                  (winner (hand 1 14) (hand 0 13) (b_five 7 20 8 21 34)));
+    "four kind beats 3 kind" >:: (fun _ -> assert_equal "player 1" 
+                                     (winner (hand 1 14) (hand 0 13) (b_five 27 40 33 21 26)));
+    "better 4 kind" >:: (fun _ -> assert_equal "player 1" 
+                            (winner (hand 1 14) (hand 0 13) 
+                               (b_five 27 40 33 26 39)));
+    "low 4 kind high 3 kind" >:: (fun _ -> assert_equal "player 2" 
+                                     (winner (hand 1 14) (hand 0 13) 
+                                        (b_five 23 40 33 26 39)));
 
-    "straight beats 2 pair" >:: (fun _ -> assert_equal "player 1" (winner (hand 40 28) (hand 51 9) (b_five 12 35 3 17 0)));
-    "ace low straight unsuited" >:: (fun _ -> assert_equal "player 1" (winner (hand 40 28) (hand 51 9) (b_five 12 35 3 50 0)));
-    "high card tie" >:: (fun _ -> assert_equal "tie" (winner (hand 1 11) (hand 14 24) (b_five 45 46 50 23 20)));
-    "flush on board tie" >:: (fun _ -> assert_equal "tie" (winner (hand 1 11) (hand 14 24) (b_five 43 45 48 50 51)));
-    "better flush" >:: (fun _ -> assert_equal "player 1" (winner (hand 1 51) (hand 14 42) (b_five 43 45 48 50 49)));
+
   ]
 
 

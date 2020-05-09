@@ -215,18 +215,17 @@ let break_mult_group n1 n2 h1 h2 =
       (Array.to_list (Array.sub (Array.of_list h2) n1 n2)) else
     break_high h1 h2
 
+let hchy hand = 
+  Array.of_list [is_royal_flush hand;best_straight_flush hand
+                ;best_four_kind hand [];best_fh hand;best_flush hand;
+                 best_straight hand [];best_three_kind hand;two_pair hand;
+                 one_pair hand;highest_n 5 hand []]
 
 let winner (h1) (h2) (t): string= 
   let hand1 = Array.to_list (Array.concat [h1;t]) in
   let hand2 = Array.to_list (Array.concat [h2;t]) in
-  let hchy1 = Array.of_list [is_royal_flush hand1;best_straight_flush hand1
-                            ;best_four_kind hand1 [];best_fh hand1;best_flush hand1;
-                             best_straight hand1 [];best_three_kind hand1;two_pair hand1;
-                             one_pair hand1;highest_n 5 hand1 []] in
-  let hchy2 = Array.of_list [is_royal_flush hand2;best_straight_flush hand2
-                            ;best_four_kind hand2 [];best_fh hand2;best_flush hand2;
-                             best_straight hand2 [];best_three_kind hand2;two_pair hand2;
-                             one_pair hand2;highest_n 5 hand2 []] in
+  let hchy1 = hchy hand1 in
+  let hchy2 = hchy hand2 in
   if (first_non_empty hchy1 0) < (first_non_empty hchy2 0) then "player 1" else
   if (first_non_empty hchy1 0) > (first_non_empty hchy2 0) then "player 2" else
     let r = first_non_empty hchy1 0 in if r = 0 then "tie" else if r = 1 then
