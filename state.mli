@@ -6,7 +6,7 @@ open Poker
 open Command
 
 (**[hand1] is a card array of player 1's hand **)
-type hand1 = card array
+type hand1 = Poker.card array
 
 (**[hand2] is a card array of player 2's hand **)
 type hand2 = card array
@@ -59,8 +59,16 @@ type started = int
  **)
 type stage = int
 
+
+type previous_move = move list
+
 (**the abstract value type representing a state object **)
-type t 
+type t = { hand1 : hand1 ; hand2 : hand2 ; 
+           table : table ; cards : cards ; cash1 : cash1 ; 
+           cash2 : cash2 ; pot : pot ; ante : ante ; 
+           previous_bets_1 : previous_bets_1 ; previous_bets_2 : previous_bets_2 
+         ; turn : turn ; started : started ; stage : stage ; 
+           previous_move : previous_move} 
 
 (**[set_stage] allows user to manually set the game state into a certain
    [stage] **)
