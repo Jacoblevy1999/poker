@@ -9,9 +9,12 @@ let print_endlines a =
   done
 
 let pp_cards state = 
-  if state.stage = 2 then (print_endline "The cards on the table are:"; print_endline (Array.to_list (state.table) |> hand_to_input |> pp3);)
-  else if state.stage = 3 then (print_endline "The cards on the table are:"; print_endline (Array.to_list (state.table) |> hand_to_input |> pp4);)
-  else if state.stage = 4 then (print_endline "The cards on the table are:"; print_endline (Array.to_list (state.table) |> hand_to_input |> pp5);)
+  if state.stage = 2 then (print_endline "The cards on the table are:"; 
+                           print_endline (Array.to_list (state.table) |> hand_to_input |> pp3);)
+  else if state.stage = 3 then (print_endline "The cards on the table are:";
+                                print_endline (Array.to_list (state.table) |> hand_to_input |> pp4);)
+  else if state.stage = 4 then (print_endline "The cards on the table are:"; 
+                                print_endline (Array.to_list (state.table) |> hand_to_input |> pp5);)
   else print_string""
 
 let string_of_command command = 
@@ -48,23 +51,28 @@ let rec predeal state acc =
      If [deal] will either move to next player's turn or deal new cards
      If [quit] will quit game**)
   let move = read_line () in
-  let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move"; Loop) in
+  let command = try (Command.parse move) with Invalid_move -> 
+    (print_endline "Invalid move"; Loop) in
   match command with 
-  |Deal -> if (acc == 1) then (set_stage (check state) (-1)) else (predeal (check state) 1)
-  |Buy_in amount -> (let buystate = (buyin (state) (amount)) in predeal buystate acc)
+  |Deal -> if (acc == 1) then (set_stage (check state) (-1)) else 
+      (predeal (check state) 1)
+  |Buy_in amount -> (let buystate = (buyin (state) (amount)) in 
+                     predeal buystate acc)
   |Quit -> print_endline "Thanks for playing!" ; exit 0
   |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); predeal state acc
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); predeal state acc
-  | _ -> print_endline "Must either [buy in] , [quit] or [deal] to countinue" ; predeal state acc
+  | _ -> print_endline "Must either [buy in] , [quit] or [deal] to countinue" ;
+    predeal state acc
 
-(**if each player has enough cash, then this is looped back into state, if not
-   then it recurses until player buys in for enough **)
+(* if each player has enough cash, then this is looped back into state, if not
+   then it recurses until player buys in for enough. **)
 
-(**returns a dealt hand after ante is paid, else it recurses until ante is paid **)
+(* returns a dealt hand after ante is paid, else it recurses until ante is paid. **)
 let rec ante_check state = 
   whose_turn state;
   let move = read_line () in
-  let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move"; Loop) in
+  let command = try (Command.parse move) with Invalid_move -> 
+    (print_endline "Invalid move"; Loop) in
   match command with 
   | Buy_in amount -> (buyin state amount) 
   |Quit -> print_endline "Thanks for playing!" ; exit 0
@@ -121,7 +129,8 @@ let rec loop state : unit =
 
     whose_turn state;
   let move = read_line () in
-  let command = try (Command.parse move) with Invalid_move -> (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
+  let command = try (Command.parse move) with Invalid_move ->
+    (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
   match command with
   |Call -> loop (new_cards (state) Call)
   |Check -> loop (new_cards state Check)
@@ -129,7 +138,8 @@ let rec loop state : unit =
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
   |Raise amount -> if amount<>(-1) then loop (raise state amount) else (print_endline "How much do you want to raise?"); loop state
   |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop (buyin state amount)
-                                                else  (print_endline "How much do you want to buy in?"); loop state) else print_endline "You must finish this hand before buying in for more" ; loop state
+                                                else  (print_endline "How much do you want to buy in?"); 
+                                                loop state) else print_endline "You must finish this hand before buying in for more" ; loop state
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
     print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
@@ -142,8 +152,10 @@ let rec loop state : unit =
     print_endline "To quit, type 'quit'.";
     print_endline "To see this list of commands again, type 'help'.";
     loop state
-  |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; (loop state);) else print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop state
-  |Cards2 -> if state.turn <> -1 then (print_endline "You can't look at player 2's cards!"; (loop state);) else print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop state
+  |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; 
+                                      (loop state);) else print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop state
+  |Cards2 -> if state.turn <> -1 then (print_endline "You can't look at player 2's cards!"; 
+                                       (loop state);) else print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop state
   |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); loop state
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop state
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop state
@@ -178,10 +190,13 @@ let rec loop2 state mode=
   |Call -> loop2 (new_cards (state) Call) mode
   |Check -> loop2 (new_cards state Check) mode
   |Fold -> print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); loop2 (fold state) mode
-  |Bet amount -> if amount<>(-1) then loop2 (bet state amount) mode else (print_endline "How much do you want to bet?"); loop2 state mode
-  |Raise amount -> if amount<>(-1) then loop2 (raise state amount) mode else (print_endline "How much do you want to raise?"); loop2 state mode
+  |Bet amount -> if amount<>(-1) then loop2 (bet state amount) mode 
+    else (print_endline "How much do you want to bet?"); loop2 state mode
+  |Raise amount -> if amount<>(-1) then loop2 (raise state amount) mode 
+    else (print_endline "How much do you want to raise?"); loop2 state mode
   |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop2 (buyin state amount) mode
-                                                else  (print_endline "How much do you want to buy in?"); loop2 state mode) else print_endline "You must finish this hand before buying in for more" ; loop2 state mode
+                                                else  (print_endline "How much do you want to buy in?"); loop2 state mode) 
+    else print_endline "You must finish this hand before buying in for more" ; loop2 state mode
   |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
     print_endline "To check, type 'check'.";
     print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
