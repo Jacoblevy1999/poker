@@ -1,5 +1,5 @@
 (** The Poker module does three key things: it builds functions to be used in
-    dealing cards, it evaluates the winner of a hand, and it prints cards in 
+    dealing cards, it evaluates the winner of a hand, and it prints cards in
     a desired way. *)
 
 (** [card] is the representation of a card. *)
@@ -42,11 +42,11 @@ val river : deck -> table -> table
 (** [highest_n n c acc] is the highest [n] values in list [c]. *)
 val highest_n : int -> allseven -> allseven -> allseven
 
-(** [best_flush c] is [[]] if there is no flush in [c], or 
+(** [best_flush c] is [[]] if there is no flush in [c], or
     a list of the best 5 cards that form a flush from [c]. *)
 val best_flush : allseven -> allseven
 
-(** [best_straight c] is [[]] if there is no straight in [c], or 
+(** [best_straight c] is [[]] if there is no straight in [c], or
     a list of the best 5 cards that form a straight from [c]. *)
 val best_straight : allseven -> allseven -> allseven
 
@@ -54,4 +54,3 @@ val best_straight : allseven -> allseven -> allseven
     is the stronger hand, and "tie" if they are equally strong, given [t] is the
     cards on the table and [h1] and [h2] and the two cards in each player's hand. *)
 val winner : hand -> hand -> table -> string
-

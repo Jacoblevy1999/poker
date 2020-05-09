@@ -1,6 +1,3 @@
-
-type move_phrase = string list
-
 type move = 
   (* Calling is matching the amount that has been put in by another player in the form of a bet or a raise. *)
   |Call
@@ -30,7 +27,7 @@ type move =
 exception Empty 
 exception Invalid_move 
 
-(** [parse_helper str] returns the list of strings with all spaces and empty 
+(** [str_to_strlst_helper str] returns the list of strings with all spaces and empty 
     strings removed. The list is in the same order as the original string.
     Requires: strlst is a list of strings *)
 let str_to_strlst_helper strlst = 
