@@ -74,3 +74,7 @@ val pp4 : (string * string) array -> string
 
 (** [pp5 input] prints five cards in a nicely formatted way. *)
 val pp5 : (string * string) array -> string
+
+(** [ values_in_hand c] returns the values of the cards that players have in 
+    their hand. *)
+val  values_in_hand : ('a * 'b) list -> 'a list
