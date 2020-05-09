@@ -345,7 +345,7 @@ let bet st amt =
       | 1 -> st.previous_bets_2 > 0
       | _ -> st.previous_bets_1 > 0) then ((print_endline "Must call, raise, or fold") ; st)
 
-  else if (amt < st.ante) then ((print_endline ("Please bet atleast the ante amount of" ^ string_of_int st.ante)) ; st)
+  else if (amt < st.ante) then ((print_endline ("Please bet at least the ante amount of " ^ string_of_int st.ante)) ; st)
   else
 
     match st.turn with 
