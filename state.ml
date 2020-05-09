@@ -640,7 +640,7 @@ let allin st =
 
            (**assign previous bet to amt value to track in case of following
               check or re-raise action **)
-           previous_bets_1 = st.cash1 ;
+           previous_bets_1 = st.cash1 + st.previous_bets_1;
 
            previous_bets_2 = st.previous_bets_2 ; 
 
@@ -707,7 +707,7 @@ let allin st =
            previous_bets_1 = st.previous_bets_1;
 
            (**player 2's most recent bet becomes his pot value **)
-           previous_bets_2 = st.cash2 ; 
+           previous_bets_2 = st.cash2 + st.previous_bets_2; 
 
            (**alternate turn, stage, starting stays same **)
            turn = -(st.turn) ; started = st.started ; stage = st.stage ; 
