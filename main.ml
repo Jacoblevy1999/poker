@@ -169,6 +169,7 @@ let command_input state mode=
 
 (**Player vs AI **)
 let rec loop2 state mode= 
+  if state.cash1 < 0 then print_endline "AI has no more money. Please play again!";
   if state.hand1 = (Array.of_list []) then loop2 (deal state) mode else
     whose_turn state;
   let command = command_input state mode in 
@@ -215,20 +216,24 @@ let rec set_buy_in str =
     if buy_int_int > 9 && buy_int_int < 1000001 then buy_int_int 
     else set_buy_in ""
 
+
 let rec set_game_mode str = 
   print_endline "Would you like to play against a human, or a computer? 
   Type 'cpu' or 'human'.";
   print_string "> ";
   let game_mode = read_line () in
   if game_mode = "quit" then begin print_endline "Thanks for playing!" ; exit 0 end
+  else if game_mode = "human" then 2 
   else if game_mode = "cpu" then 
-    print_endline "Would you like to play on 'easy' or 'hard'?"; 
+    set_level () else
+    set_game_mode ""
+
+and set_level () = 
+  print_endline "Would you like to play on 'easy' or 'hard'?"; 
   print_string "> ";
   let level = read_line () in 
   if level = "quit" then begin print_endline "Thanks for playing!" ; exit 0 end
-  else if level = "easy" then 11 else if level = "hard" then 12 else
-  if game_mode = "human" then 2 else
-    set_game_mode ""
+  else if level = "easy" then 11 else if level = "hard" then 12 else set_game_mode ""
 
 let rec set_ante str = 
   print_endline "Type an amount between $1 and $1000 and then hit enter.";

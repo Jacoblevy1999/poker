@@ -58,7 +58,8 @@ let chen_strength (in_hand:card list) : int=
 (** [remove_from_deck card deck] removes [card] from the [deck]. *)
 let rec remove_from_deck cards deck = 
   match deck with
-  |h::t -> if List.mem h cards then remove_from_deck cards t else h::(remove_from_deck cards t)
+  |h::t -> if List.mem h cards then remove_from_deck cards t 
+    else h::(remove_from_deck cards t)
   |[] -> []
 
 (** [simulate_hand table hand] is the winner of a simulated hand given a current 
@@ -102,17 +103,20 @@ let preflop_bet st last pot in_hand : Command.move=
     let strength = chen_strength in_hand in
     match last with
     |Some Check
-    |None -> if strength >= 9 then legal_bet st (bet_range (pot) (pot*4)) else if strength >= 7
-      then legal_bet st (bet_range (pot) (pot*5)) else if strength >= 5
-      then legal_bet st (bet_range (pot/2) (pot*4)) else let r = Random.float 1. in if r < 0.8 then
-          Check else legal_bet st (bet_range (pot/2) (pot*2))
+    |None -> let r = Random.float 1. in 
+      if strength >= 9 then if r > 0.8 then Check else 
+          legal_bet st (bet_range (pot) (pot*4)) 
+      else if strength >= 6 then if r > 0.7 then legal_bet st (bet_range (pot) (pot*4)) 
+        else Check else if strength >= 4
+      then if r > 0.65 then legal_bet st (bet_range (pot/2) (pot*3)) else Check
+      else if r < 0.8 then Check else legal_bet st (bet_range (pot/2) (pot*2))
     |Some AllIn -> if strength >= 1 then AllIn else Fold
     | _ -> let r = Random.float 1. in 
       let bet_prop = (float_of_int (match st.turn with
           | 1 -> st.previous_bets_2
           | _ -> st.previous_bets_1)) /. (float_of_int st.pot) in
       let heuristic = 3 * strength - (int_of_float (bet_prop *. 10.)) in
-      if heuristic >= 24 then if r > 0.9 then legal_call st else
+      if heuristic >= 24 then if r > 0.8 then legal_call st else
           legal_raise st (bet_range (pot) (pot*2)) else if heuristic >= 19
       then if r > 0.75 then legal_raise st (bet_range (pot) (pot*2))
         else legal_call st else if heuristic >= 14
@@ -129,14 +133,14 @@ let reactionary_bet chance st =
       | _ -> st.previous_bets_1)) /. (float_of_int st.pot) in
   let heuristic = 2.5 *. chance -. bet_prop in
   if heuristic > 2.05 then legal_raise st (bet_range (st.pot/2) st.pot*4)
-  else if heuristic > 1.80 then if r > 0.85 then legal_call st else 
+  else if heuristic > 1.80 then if r > 0.80 then legal_call st else 
       legal_raise st (bet_range (st.pot/3) st.pot*3) else 
   if heuristic > 1.65 then if r > 0.4 then legal_call st else 
       legal_raise st (bet_range (st.pot/4) st.pot*2) else 
   if heuristic > 1.5 then if r > 0.25 then legal_call st else 
       legal_raise st (bet_range (st.pot/4) st.pot) else 
   if heuristic > 1.35 then if r > 0.4 then legal_call st else 
-    if r < 0.25 then legal_raise st (bet_range (st.pot/8) st.pot) else Fold else
+    if r > 0.25 then legal_raise st (bet_range (st.pot/8) st.pot) else Fold else
   if heuristic < 1.15 then Fold else
   if r > 0.85 then legal_raise st (bet_range (st.pot/3) st.pot*3) else Fold
 
@@ -148,17 +152,19 @@ let hard_strat (st:State.t) : Command.move =
       if st.cash2 <= 0 then Some AllIn else Some (List.hd st.previous_move) in
     let num_cards = Array.length st.table + Array.length st.hand1 in
     if num_cards = 2 then preflop_bet st last st.pot (Array.to_list st.hand1) else
-      let chance = (pct_chance 0 0 1000 st.table st.hand1) in
+      let chance = (pct_chance 0 0 1200 st.table st.hand1) in
       match last with
       |Some Check
       |None -> 
         Random.self_init(); let r = Random.float 1. in
         if chance > 0.85 then if r > 0.85 then legal_bet st (bet_range (st.pot) st.pot*5) 
-          else Bet (bet_range (st.pot/3) st.pot*4) else 
+          else legal_bet st (bet_range (st.pot/3) st.pot*4) else 
         if chance > 0.75 then legal_bet st (bet_range (st.pot/3) st.pot*3) else 
         if chance > 0.65 then legal_bet st (bet_range (st.pot/4) st.pot*2) else 
         if chance > 0.50 then legal_bet st (bet_range (st.pot/8) st.pot) else 
         if chance < 0.25 then Check else
         if r > 0.8 then legal_bet st (bet_range (st.pot/3) st.pot*4) else Check
-      |Some AllIn -> if chance >= 0.75 then AllIn else Fold
+      |Some AllIn ->
+        if st.previous_move = [] || List.hd st.previous_move = Check then Check 
+        else if chance >= 0.75 then AllIn else Fold
       |_ -> reactionary_bet chance st
