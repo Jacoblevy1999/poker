@@ -131,9 +131,11 @@ let set_stage st amt =
    array st.cards, then auto bets the ante of each player.  **)
 let deal st = 
 
-  print_endline "\nDealing hands now. "; print_endline ("Each player pays an ante of $" ^ string_of_int st.ante ^ "\n");
+  print_endline "\nDealing hands now. "; 
+  print_endline ("Each player pays an ante of $" ^ string_of_int st.ante ^ "\n");
 
-  if (Array.length st.cards <> 9) then ((print_endline "Dealing not possible"); st)
+  if (Array.length st.cards <> 9) then 
+    ((print_endline "Dealing not possible"); st)
   else 
 
 
@@ -209,7 +211,8 @@ let flop st =
     let flop = (Poker.flop (st.cards) (Array.of_list ([]))) in 
     let remainingcards = (fst flop) in 
     let table = (snd flop) in 
-    print_endline "The cards on the table are:"; print_endline (Array.to_list (table) |> hand_to_input |> pp3);
+    print_endline "The cards on the table are:"; 
+    print_endline (Array.to_list (table) |> hand_to_input |> pp3);
 
     (**table gets reassigned, st.cards gets reassigned, everything else
        stays untouched because no turn is made **)
@@ -229,7 +232,8 @@ let turn st =
     let turn = (Poker.turn (st.cards) (st.table)) in 
     let remainingcards = (fst turn) in 
     let table = (snd turn) in
-    print_endline "The cards on the table are:"; print_endline (Array.to_list (table) |> hand_to_input |> pp4);
+    print_endline "The cards on the table are:"; 
+    print_endline (Array.to_list (table) |> hand_to_input |> pp4);
     { hand1 = st.hand1 ; hand2 = st.hand2 ; 
       table = table ; cards = remainingcards ; cash1 = st.cash1 ; 
       cash2 = st.cash2 ; pot = st.pot
@@ -238,11 +242,13 @@ let turn st =
 
 let river st = 
   (**checks to make sure turn is a valid move **)
-  if (Array.length st.cards <> 1) then ((print_endline "River not possible"); st)
+  if (Array.length st.cards <> 1) 
+  then ((print_endline "River not possible"); st)
   else 
 
     let table = (Poker.river (st.cards) (st.table)) in 
-    print_endline "The cards on the table are:"; print_endline (Array.to_list (table) |> hand_to_input |> pp5);
+    print_endline "The cards on the table are:"; 
+    print_endline (Array.to_list (table) |> hand_to_input |> pp5);
     { hand1 = st.hand1 ; hand2 = st.hand2 ; 
       table = table ; cards = Array.of_list ([]) ; cash1 = st.cash1 ; 
       cash2 = st.cash2 ; pot = st.pot
@@ -259,7 +265,8 @@ let river st =
 let winner st = 
 
   (**check winner check is appropriate **)
-  if (Array.length st.cards <> 0) then ((print_endline "Winner cannot be determined without final card"); st)
+  if (Array.length st.cards <> 0) then 
+    ((print_endline "Winner cannot be determined without final card"); st)
   else 
 
     let hand1 = st.hand1 in 
@@ -269,20 +276,26 @@ let winner st =
 
     (**if player 1 wins then reassign pots and reset game accordingly **)
     |"player 1" -> 
-      print_string "Player 1 wins with "; print_string (format_lst (Array.to_list st.hand1)); 
+      print_string "Player 1 wins with "; 
+      print_string (format_lst (Array.to_list st.hand1)); 
       init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
 
     (**if player 2 wins then reassign pots and reset game accordingly **)
     |"player 2" ->
-      print_string "Player 2 wins with "; print_string (format_lst (Array.to_list st.hand2)); 
+      print_string "Player 2 wins with "; 
+      print_string (format_lst (Array.to_list st.hand2)); 
       init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
 
     (**if players tie then reassign pots and reset game accordingly **)
     |"tie" ->
-      print_string "Both players tied. Player 1 had"; print_string (format_lst (Array.to_list st.hand1)); print_endline "Player 2 had" ; print_string (format_lst (Array.to_list st.hand2)); 
+      print_string "Both players tied. Player 1 had"; 
+      print_string (format_lst (Array.to_list st.hand1)); 
+      print_endline "Player 2 had" ; 
+      print_string (format_lst (Array.to_list st.hand2)); 
       let payout = (st.pot/2) in
 
-      init_state (st.cash1 + payout) (st.cash2 + payout) (st.ante) (-(st.started))
+      init_state (st.cash1 + payout) 
+        (st.cash2 + payout) (st.ante) (-(st.started))
 
     | _ -> failwith "Not Possible"
 
@@ -298,14 +311,18 @@ let buyin st amt =
     | 1 -> { hand1 = st.hand1 ; hand2 = st.hand2 ; 
              table = st.table ; cards = st.cards ; cash1 = st.cash1 + amt; 
              cash2 = st.cash2 ; pot = st.pot
-           ; ante = st.ante ; previous_bets_1 = st.previous_bets_1 ; previous_bets_2 = st.previous_bets_2
-           ; turn = st.turn ; started = st.started ; stage = st.stage ; previous_move = st.previous_move} 
+           ; ante = st.ante ; previous_bets_1 = st.previous_bets_1 ;
+             previous_bets_2 = st.previous_bets_2
+           ; turn = st.turn ; started = st.started ; stage = st.stage ;
+             previous_move = st.previous_move} 
     | -1 -> 
       { hand1 = st.hand1 ; hand2 = st.hand2 ; 
         table = st.table ; cards = st.cards ; cash1 = st.cash1; 
         cash2 = st.cash2 + amt ; pot = st.pot
-      ; ante = st.ante ; previous_bets_1 = st.previous_bets_1 ; previous_bets_2 = st.previous_bets_2 ; 
-        turn = st.turn  ; started = st.started ; stage = st.stage ; previous_move = st.previous_move} 
+      ; ante = st.ante ; previous_bets_1 = st.previous_bets_1 ;
+        previous_bets_2 = st.previous_bets_2 ; 
+        turn = st.turn  ; started = st.started ; stage = st.stage ;
+        previous_move = st.previous_move} 
     | _ -> failwith "Impossible"
 
 
@@ -319,8 +336,10 @@ let buyin st amt =
 let fold st = 
   match st.turn with 
   (**check who folds dependent on that is who you change the pot value **)
-  |1 -> print_endline "Player 1 folds, player 2 wins."; init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
-  |(-1) -> print_endline "Player 2 folds, player 1 wins."; init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
+  |1 -> print_endline "Player 1 folds, player 2 wins."; 
+    init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
+  |(-1) -> print_endline "Player 2 folds, player 1 wins."; 
+    init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
   |_ -> failwith "Impossible"
 (**if player 1 turn, then intialize new hand with player 1 cash
    (* same and player 2 gaining pot value **)
@@ -337,15 +356,20 @@ let bet st amt =
   if (
     match st.turn with 
     | 1 -> st.cash2 = 0
-    | _ -> st.cash1 = 0) then (print_endline "Cannot bet when your oppoent is all in. You can only call, check, or fold" ; st)
+    | _ -> st.cash1 = 0) then 
+    (print_endline "Cannot bet when your oppoent is all in.
+     You can only call, check, or fold" ; st)
 
   else
     (**If previous bet was made, you cannot bet again **)
   if (match st.turn with 
       | 1 -> st.previous_bets_2 > 0
-      | _ -> st.previous_bets_1 > 0) then ((print_endline "Must call, raise, or fold") ; st)
+      | _ -> st.previous_bets_1 > 0) 
+  then ((print_endline "Must call, raise, or fold") ; st)
 
-  else if (amt < st.ante) then ((print_endline ("Please bet at least the ante amount of " ^ string_of_int st.ante)) ; st)
+  else if (amt < st.ante) 
+  then ((print_endline ("Please bet at least the ante amount of " 
+                        ^ string_of_int st.ante)) ; st)
   else
 
     match st.turn with 
@@ -389,7 +413,8 @@ let bet st amt =
 
           (**if player2 turn then bet amount subtracted from st.cash2 **)
           cash1 = (st.cash1) ; 
-          cash2 = (st.cash2-amt) + st.previous_bets_2 ; pot = (st.pot + amt) - st.previous_bets_2
+          cash2 = (st.cash2-amt) + st.previous_bets_2 ;
+          pot = (st.pot + amt) - st.previous_bets_2
           ; ante = st.ante ; 
 
           (**player 1 previous bets stay same **)
@@ -414,28 +439,33 @@ let raise st amt =
   (**checks to see if another bet was made in prior action **)
   if (match st.turn with 
       | 1 -> st.previous_bets_2 = 0
-      | _ -> st.previous_bets_1 = 0) then ((print_endline "Cannot raise without previous bet") ; st)
+      | _ -> st.previous_bets_1 = 0) 
+  then ((print_endline "Cannot raise without previous bet") ; st)
 
   (**checks if anyone is all in, cannot re-raise an all in **)
   else if (
     match st.turn with 
     | 1 -> st.cash2 = 0
-    | _ -> st.cash1 = 0) then (print_endline "Cannot raise your opponent when they are all in. You can only call, check, or fold" ; st)
+    | _ -> st.cash1 = 0) then 
+    (print_endline "Cannot raise your opponent when they are all in. 
+    You can only call, check, or fold" ; st)
 
   (**checks to see if raise amount is atleast twice the previous bet **)
   else if (match st.turn with 
       | 1 -> amt < 2 * st.previous_bets_2 
       | _ -> amt < 2 * st.previous_bets_1)
-  then (print_endline ("Raise must be atleast twice the previous bet of " ^ string_of_int (match st.turn with 
-      | 1 -> (st.previous_bets_2) 
-      | _ -> (st.previous_bets_1))) ; st )
+  then (print_endline ("Raise must be atleast twice the previous bet of " 
+                       ^ string_of_int (match st.turn with 
+                           | 1 -> (st.previous_bets_2) 
+                           | _ -> (st.previous_bets_1))) ; st )
   else 
 
     match st.turn with 
     | 1 -> 
 
       (**Check if player1 has enough cash1 to raise the previous_bet **)
-      if (amt > st.cash1 + st.previous_bets_1) then ((print_endline "Not enough cash") ; st) else 
+      if (amt > st.cash1 + st.previous_bets_1) 
+      then ((print_endline "Not enough cash") ; st) else 
 
         (
           { 
@@ -446,7 +476,8 @@ let raise st amt =
 
             (**if player1 turn then raise amount subtracted from cash1 **)
             cash1 = (st.cash1 - amt) + st.previous_bets_1; 
-            cash2 = st.cash2 ; pot = (st.pot + amt) - st.previous_bets_1 ; ante = st.ante ; 
+            cash2 = st.cash2 ; pot = (st.pot + amt) - st.previous_bets_1 ;
+            ante = st.ante ; 
 
             (**assign previous raise amt value to track in case of following
                check or re-raise action **)
@@ -465,7 +496,8 @@ let raise st amt =
     | -1 -> 
 
       (**Check if player2 has enough cash2 to raise the previous_bet**)
-      if (amt > st.cash2 + st.previous_bets_2) then ((print_endline "Not enough cash") ; st) else 
+      if (amt > st.cash2 + st.previous_bets_2) 
+      then ((print_endline "Not enough cash") ; st) else 
 
         (
 
@@ -477,7 +509,8 @@ let raise st amt =
 
             (**if player1 turn then previous_bet amount subtracted from cash1 **)
             cash1 = (st.cash1) ; 
-            cash2 = st.cash2 - amt + st.previous_bets_2 ; pot = (st.pot + amt) - st.previous_bets_2 
+            cash2 = st.cash2 - amt + st.previous_bets_2 ;
+            pot = (st.pot + amt) - st.previous_bets_2 
             ; ante = st.ante ; 
 
             (**player 1 previous_bets_1 stays the same**)
@@ -514,7 +547,8 @@ let call st =
     match st.turn with 
     | 1 -> 
 
-      (**failsafe to check if player1 has enough cash1 to call the previous_bet **)
+      (**failsafe to check if player1 has
+         enough cash1 to call the previous_bet **)
       if (st.previous_bets_2 > st.cash1 + st.previous_bets_1) 
       then (print_endline ("Not enough cash to call"); st) 
       else 
@@ -527,7 +561,8 @@ let call st =
 
           (**if player1 turn then previous_bet amount subtracted from cash1 **)
           cash1 = (st.cash1 - st.previous_bets_2) + st.previous_bets_1 ; 
-          cash2 = st.cash2 ; pot = (st.pot + st.previous_bets_2) - st.previous_bets_1
+          cash2 = st.cash2 ; 
+          pot = (st.pot + st.previous_bets_2) - st.previous_bets_1
           ; ante = st.ante ; 
 
           (**since you cannot call or raise a call previous_bet gets 
@@ -545,7 +580,8 @@ let call st =
         } 
     | -1 -> 
 
-      (**failsafe to check if player1 has enough cash1 to call the previous_bet **)
+      (**failsafe to check if player1 has enough 
+         cash1 to call the previous_bet **)
       if (st.previous_bets_1  > st.cash2 + st.previous_bets_2) 
       then (print_endline ("Not enough cash to call"); st) 
       else 
@@ -568,7 +604,8 @@ let call st =
              check or re-raise action **)
           previous_bets_1 = st.previous_bets_1 ;
 
-          (**player 2's previous bets assigned to same value as player 1's amt *)
+          (**player 2's previous bets assigned to same value
+             as player 1's amt *)
           previous_bets_2 = st.previous_bets_1 ; 
 
           (**alternate turn, starting stays same **)
@@ -585,7 +622,8 @@ let check st =
 
   if (match st.turn with 
       | 1 -> st.previous_bets_2 > 0
-      | _ -> st.previous_bets_1 > 0) then ((print_endline "Must call, raise, or fold") ; st)
+      | _ -> st.previous_bets_1 > 0) 
+  then ((print_endline "Must call, raise, or fold") ; st)
   else
 
     { hand1 = st.hand1 ; hand2 = st.hand2 ; 
@@ -620,7 +658,8 @@ let allin st =
        (**if player 1 is going all in, check to see if they are going all in for
           more than the previous bet and that previous cash is 0, if so triggers 
           error message **)
-     if (st.cash2 = 0 && st.previous_bets_2 < st.cash1) then (print_endline "Player 1 calls" ;  (call st)) 
+     if (st.cash2 = 0 && st.previous_bets_2 < st.cash1) 
+     then (print_endline "Player 1 calls" ;  (call st)) 
      else (
 
        print_endline "Player 1 is all in" ; 
@@ -655,7 +694,8 @@ let allin st =
          is more than what you have*)
 
        else (
-         print_endline ("$" ^ (string_of_int (st.previous_bets_2 - st.cash1)) ^ " has been returned to Player 2's cash") ; 
+         print_endline ("$" ^ (string_of_int (st.previous_bets_2 - st.cash1)) 
+                        ^ " has been returned to Player 2's cash") ; 
 
          { hand1 = st.hand1 ; hand2 = st.hand2 ; 
            table = st.table ; cards = st.cards ; 
@@ -667,12 +707,14 @@ let allin st =
               and its previous bet **)
            cash2 = st.cash2 + (st.previous_bets_2 - st.cash1); 
 
-           (**difference between all in bet and previous bet is taken out of pot and
-              returned to player 2, and player 1 cash put into pot **)
+           (**difference between all in bet and previous bet is take
+              n out of pot and returned to player 2, and player 1 
+              cash put into pot **)
            pot = st.pot - (st.previous_bets_2 - st.cash1) + st.cash1
 
 
-         ; ante = st.ante ; previous_bets_1 = st.cash1 ; previous_bets_2 = st.cash1;
+         ; ante = st.ante ; previous_bets_1 = st.cash1 ;
+           previous_bets_2 = st.cash1;
            turn = -(st.turn)
          ; started = st.started ; stage = st.stage;
 
@@ -684,7 +726,8 @@ let allin st =
 
      if (st.cash2 = 0) then (print_endline "You are already all in"; st ) else 
 
-     if (st.cash1 = 0 && st.previous_bets_1 < st.cash2) then (print_endline "Player 2 calls" ;  (call st)) 
+     if (st.cash1 = 0 && st.previous_bets_1 < st.cash2) 
+     then (print_endline "Player 2 calls" ;  (call st)) 
 
      else (
 
@@ -700,7 +743,8 @@ let allin st =
 
            (**if player1 turn then bet amount subtracted from player1_cash **)
            cash1 = st.cash1 ; 
-           cash2 = st.cash2 - st.cash2 ; pot = (st.pot + st.cash2) ; ante = st.ante ; 
+           cash2 = st.cash2 - st.cash2 ; pot = (st.pot + st.cash2) ;
+           ante = st.ante ; 
 
            (**assign previous bet to amt value to track in case of following
               check or re-raise action **)
@@ -718,7 +762,8 @@ let allin st =
 
        (**going all in against a bet that is more valuable than your cash **)
        else (
-         print_endline ("$" ^ (string_of_int (st.previous_bets_1 - st.cash2)) ^ " has been returned to Player 1's cash") ; 
+         print_endline ("$" ^ (string_of_int (st.previous_bets_1 - st.cash2))
+                        ^ " has been returned to Player 1's cash") ; 
 
          (**player 1 turn, matches the max amount of previous bet it can **)
          { hand1 = st.hand1 ; hand2 = st.hand2 ; 
@@ -736,7 +781,8 @@ let allin st =
            pot = st.pot - (st.previous_bets_1 - st.cash2) + st.cash2
 
 
-         ; ante = st.ante ; previous_bets_1 = st.cash2 ; previous_bets_2 = st.cash2 ;
+         ; ante = st.ante ; previous_bets_1 = st.cash2 ; 
+           previous_bets_2 = st.cash2 ;
            turn = -(st.turn)
          ; started = st.started ; stage = st.stage;
 
@@ -797,8 +843,10 @@ let new_cards st cmd =
   | Call -> (
       if 
         (match st.turn with 
-         | 1 -> if st.previous_bets_2 > st.cash1 + st.previous_bets_1 then true else false
-         | _ -> if st.previous_bets_1 > st.cash2 + st.previous_bets_1 then true else false)
+         | 1 -> if st.previous_bets_2 > st.cash1 + st.previous_bets_1
+           then true else false
+         | _ -> if st.previous_bets_1 > st.cash2 + st.previous_bets_1 
+           then true else false)
       then (call st)
       else newcards_helper (st) (Call) )
 
