@@ -54,3 +54,23 @@ val best_straight : allseven -> allseven -> allseven
     is the stronger hand, and "tie" if they are equally strong, given [t] is the
     cards on the table and [h1] and [h2] and the two cards in each player's hand. *)
 val winner : hand -> hand -> table -> string
+
+(** [format lst] takes in a list of cards and returns a nice string
+    representation of the cards. *)
+val format_lst : (int * string) list -> string
+
+(** [hand_to_input hand] takes a list of cards and returns a list of the same 
+    cards with the types changed so the cards can be printed easily. *)
+val hand_to_input : (int * string) list -> (string * string) array
+
+(** [pp2 input] prints two cards in a nicely formatted way. *)
+val pp2 : (string * string) array -> string
+
+(** [pp3 input] prints three cards in a nicely formatted way. *)
+val pp3 : (string * string) array -> string
+
+(** [pp4 input] prints four cards in a nicely formatted way. *)
+val pp4 : (string * string) array -> string
+
+(** [pp5 input] prints five cards in a nicely formatted way. *)
+val pp5 : (string * string) array -> string

@@ -348,29 +348,6 @@ let pp5 input =
         |___|  |___|  |___|  |___|  |___|
         "
 
-(* OLD PP3 *)
-(* let pp3 input = 
-   "         ___    ___    ___
-        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |
-        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|
-        |___|  |___|  |___|
-        " *)
-
-(* OLD PP4 *)
-(* let pp4 input =
-   "         ___    ___    ___    ___
-        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |
-        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|
-        |___|  |___|  |___|  |___|
-        " *)
-
-(* OLD PP5 *)
-(* let pp5 input = 
-   "         ___    ___    ___    ___    ___
-        |"^(fst input.(0))^"  |  |"^(fst input.(1))^"  |  |"^(fst input.(2))^"  |  |"^(fst input.(3))^"  |  |"^(fst input.(4))^"  |
-        |  "^(snd input.(0))^"|  |  "^(snd input.(1))^"|  |  "^(snd input.(2))^"|  |  "^(snd input.(3))^"|  |  "^(snd input.(4))^"|
-        |___|  |___|  |___|  |___|  |___|
-        " *)
 
 
 
