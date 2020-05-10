@@ -42,8 +42,6 @@ let string_of_command command =
   |_ -> "is confused"
 
 let whose_turn state = 
-  print_endline ("Player 1 Cash: $" ^ string_of_int state.cash1 ^ "           Player 2 has bet $" ^ string_of_int state.previous_bets_1 ^ " this round");
-  print_endline ("Player 2 Cash: $" ^ string_of_int state.cash2 ^ "           Player 2 has bet $" ^ string_of_int state.previous_bets_2 ^ " this round");
   if state.turn = 1 then print_string "It is player 1's turn. > "
   else print_string "It is player 2's turn. > "
 
