@@ -207,6 +207,19 @@ let tests = "poker test suite" >::: [
     "straight flush better than flush" >:: (fun _ -> assert_equal "player 1" 
                                                (winner (hand 2 4) (hand 11 12) 
                                                   (b_five 0 3 1 8 9)));
+    "3 kinds beats pair" >:: (fun _ -> assert_equal "player 1" 
+                                 (winner (hand 2 15) (hand 28 51) 
+                                    (b_five 41 3 1 8 17)));
+    "3 kinds beats lower 2 pair" >:: (fun _ -> assert_equal "player 1" 
+                                         (winner (hand 12 25) (hand 0 10) 
+                                            (b_five 51 23 13 8 9)));
+    "3 kinds beats higher 2 pair" >:: (fun _ -> assert_equal "player 2" 
+                                          (winner (hand 12 25) (hand 0 10) 
+                                             (b_five 36 23 34 8 9)));
+    "straight beats 3 kind" >:: (fun _ -> assert_equal "player 1" 
+                                    (winner (hand 12 25) (hand 0 10) 
+                                       (b_five 36 23 37 8 9)));
+
 
 
   ]
