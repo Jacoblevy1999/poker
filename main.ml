@@ -3,6 +3,19 @@ open State
 open Command
 open Strategies
 
+let help : unit = begin print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
+  print_endline "To check, type 'check'.";
+  print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
+  print_endline "To call, type 'call'.";
+  print_endline "To fold, type 'fold'.";
+  print_endline "To see player 1's cards, enter 'p1 cards'";
+  print_endline "To see player 2's cards, enter 'p2 cards'";
+  print_endline "To see the money in the pot, enter 'pot'.";
+  print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
+  print_endline "To quit, type 'quit'.";
+  print_endline "To see this list of commands again, type 'help'.";
+end
+
 let print_endlines a = 
   for x = a to 13 do 
     print_endline ""
@@ -140,18 +153,7 @@ let rec loop state : unit =
   |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop (buyin state amount)
                                                 else  (print_endline "How much do you want to buy in?"); 
                                                 loop state) else print_endline "You must finish this hand before buying in for more" ; loop state
-  |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
-    print_endline "To check, type 'check'.";
-    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
-    print_endline "To call, type 'call'.";
-    print_endline "To fold, type 'fold'.";
-    print_endline "To see player 1's cards, enter 'p1 cards'";
-    print_endline "To see player 2's cards, enter 'p2 cards'";
-    print_endline "To see the money in the pot, enter 'pot'.";
-    print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
-    print_endline "To quit, type 'quit'.";
-    print_endline "To see this list of commands again, type 'help'.";
-    loop state
+  |Help -> help; loop state
   |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; 
                                       (loop state);) else print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop state
   |Cards2 -> if state.turn <> -1 then (print_endline "You can't look at player 2's cards!"; 
@@ -197,18 +199,7 @@ let rec loop2 state mode=
   |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop2 (buyin state amount) mode
                                                 else  (print_endline "How much do you want to buy in?"); loop2 state mode) 
     else print_endline "You must finish this hand before buying in for more" ; loop2 state mode
-  |Help -> print_endline "To place a bet, type 'bet [amount]', i.e. 'bet $25' bets $25.";
-    print_endline "To check, type 'check'.";
-    print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
-    print_endline "To call, type 'call'.";
-    print_endline "To fold, type 'fold'.";
-    print_endline "To see player 1's cards, enter 'p1 cards'";
-    print_endline "To see player 2's cards, enter 'p2 cards'";
-    print_endline "To see the money in the pot, enter 'pot'.";
-    print_endline "To buy in, type 'buy in [amount]', i.e. 'buy in $50' will add $50 to your cash.";
-    print_endline "To quit, type 'quit'.";
-    print_endline "To see this list of commands again, type 'help'.";
-    loop2 state mode
+  |Help -> help; loop2 state mode
   |Cards1 -> print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state mode
   |Cards2 -> print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state mode
   |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); loop2 state mode
