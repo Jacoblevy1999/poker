@@ -144,6 +144,7 @@ let rec loop state : unit =
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move ->
     (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
+  print_endline "";
   match command with
   |Call -> loop (new_cards (state) Call)
   |Check -> loop (new_cards state Check)
