@@ -185,6 +185,8 @@ let command_input state mode=
 (**Player vs AI **)
 let rec loop2 state mode= 
   if state.cash1 < 0 then (print_endline "AI has no more money. Please play again!" ; exit 0)
+  else if state.cash2 < state.ante then 
+    (print_endline "You do not have enough money left to play. Please play again!" ; exit 0)
   else if state.hand1 = (Array.of_list []) then loop2 (deal state) mode else
     whose_turn state;
   let command = command_input state mode in 
