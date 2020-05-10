@@ -220,8 +220,6 @@ let tests = "poker test suite" >::: [
                                     (winner (hand 12 25) (hand 0 10) 
                                        (b_five 36 23 37 8 9)));
 
-
-
   ]
 
 

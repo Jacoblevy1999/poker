@@ -22,7 +22,8 @@ let rec shuffle (fulldeck: deck) (acc:deck) : deck =
   Random.self_init(); 
   if Array.length acc = 9 then acc else
     let pos = Random.int (Array.length fulldeck) in 
-    shuffle (Array.concat [(Array.sub fulldeck 0 pos);(Array.sub fulldeck (pos+1) ((Array.length fulldeck)-pos-1))]) 
+    shuffle (Array.concat [(Array.sub fulldeck 0 pos);(Array.sub fulldeck (pos+1) 
+                                                         ((Array.length fulldeck)-pos-1))]) 
       (Array.of_list (fulldeck.(pos)::(Array.to_list acc)))
 
 let rec deal (deck:deck) (hand:hand) : deck * hand = 
@@ -120,13 +121,17 @@ let best_straight (c) (acc)=
   let rec straight_sorter lst acc = 
     match lst with
     |[] -> if List.length acc > 5 then highest_n 5 acc []
-      else if List.length acc >= 5 then (Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 5))
-      else if List.length acc = 4 && List.mem 0 (values_in_hand acc) && List.mem 12 (values_in_hand c) then 
-        (List.hd (add_all_value 12 c []))::(Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 4))
+      else if List.length acc >= 5 then 
+        (Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 5))
+      else if List.length acc = 4 && List.mem 0 (values_in_hand acc) 
+              && List.mem 12 (values_in_hand c) then 
+        (List.hd (add_all_value 12 c []))::
+        (Array.to_list (Array.sub (Array.of_list (List.rev acc)) 0 4))
       else []
     |(k,v)::t -> if acc = [] then straight_sorter t [(k,v)] else
       if k = 1+(fst (List.hd acc)) then straight_sorter t ((k,v)::acc) else 
-      if (List.length acc) >= 4 then straight_sorter [] acc else straight_sorter t [(k,v)]
+      if (List.length acc) >= 4 then 
+        straight_sorter [] acc else straight_sorter t [(k,v)]
   in straight_sorter (List.rev (List.sort_uniq helper_comp c)) []
 
 let best_straight_flush c = 
@@ -239,8 +244,10 @@ let winner (h1) (h2) (t): string=
       break_group 2 (one_pair hand1) (one_pair hand2) else 
       break_high (highest_n 5 hand1 []) (highest_n 5 hand2 [])
 
-let val_dict  = Array.of_list ["two of";"three of";"four of";"five of";"six of";"seven of";
-                               "eight of";"nine of";"ten of";"jack of";"queen of";"king of";"ace of"]
+let val_dict  = Array.of_list ["two of";"three of";"four of";"five of";
+                               "six of";"seven of";
+                               "eight of";"nine of";"ten of";"jack of";
+                               "queen of";"king of";"ace of"]
 
 let val_dict1 = Array.of_list ["2";"3";"4";"5";"6";"7";
                                "8";"9";"10";"J";"Q";"K";"A"]
