@@ -1,13 +1,14 @@
 open Poker
 open OUnit2
 
-
 (** TESTING STRATEGY: Our testing strategy revolved mostly around testing the
     functions from the [Poker] module in OUnit, and then play testing the remainder 
     of the game. We thought this to be prudent, as we could not realistically
     play enough poker to catch all of the crazy edge cases (something like an Ace-low
     flush, for examply, is incredibly rare) that occur in evaluating a winner in poker. 
-    However, we felt we could play-test sufficiently, as to capture all possible 
+    Additionally, we wanted to make sure that the functions that deal out cards are dealing
+    out the correct number of cards every time, as our internal system relies heavily
+    on this. We felt we could play-test the rest sufficiently, as to capture all possible 
     player actions in this two-player game. So, for the test cases done in OUnit, 
     all of which were from the [Poker] module, we went with a black-box testing 
     procedure. We first wanted to make sure that hands that were a certain "pattern"
@@ -78,6 +79,13 @@ let b_five_lst i1 i2 i3 i4 i5 =
                                (Array.sub full_deck i3 1);(Array.sub full_deck i4 1);(Array.sub full_deck i5 1)])
 
 let tests = "poker test suite" >::: [
+    "deal is right cards for hand" >:: (fun _ -> assert_equal (hand 4 2)
+                                           (snd (deal (table 2 4 5 6 7 8 9) (Array.of_list []))));
+    "deal is right cards for table" >:: (fun _ -> assert_equal (b_five 5 6 7 8 9)
+                                            (fst (deal (table 2 4 5 6 7 8 9) (Array.of_list []))));
+    "shuffle is 9 cards" >:: (fun _ -> assert_equal 9 
+                                 (List.length 
+                                    (Array.to_list (shuffle full_deck (Array.of_list [])))));
     "highest 5"  >:: (fun _ -> assert_equal 
                          true (cmp_set_like_lists 
                                  (b_five_lst 11 12 9 10 8) 
@@ -184,12 +192,21 @@ let tests = "poker test suite" >::: [
     "same two pair same high" >:: (fun _ -> assert_equal "tie" 
                                       (winner (hand 12 0) (hand 51 13) 
                                          (b_five 26 8 21 22 49)));
-    "high card" >:: (fun _ -> assert_equal "player 2" 
-                        (winner (hand 1 14) (hand 0 13) 
-                           (b_five 23 40 33 26 39)));
-
-
-
+    "high card same pair" >:: (fun _ -> assert_equal "player 2" 
+                                  (winner (hand 12 15) (hand 25 24) 
+                                     (b_five 51 42 44 45 34)));
+    "flush tie break" >:: (fun _ -> assert_equal "player 1" 
+                              (winner (hand 12 4) (hand 11 2) 
+                                 (b_five 0 3 6 8 9)));
+    "flush second tie break" >:: (fun _ -> assert_equal "player 1" 
+                                     (winner (hand 7 4) (hand 5 2) 
+                                        (b_five 0 3 6 8 9)));
+    "straight flush better than straight" >:: (fun _ -> assert_equal "player 1" 
+                                                  (winner (hand 1 2) (hand 14 15) 
+                                                     (b_five 0 3 4 8 9)));
+    "straight flush better than flush" >:: (fun _ -> assert_equal "player 1" 
+                                               (winner (hand 2 4) (hand 11 12) 
+                                                  (b_five 0 3 1 8 9)));
 
 
   ]
