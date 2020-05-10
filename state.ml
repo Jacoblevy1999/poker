@@ -536,7 +536,7 @@ let allin_helper_1 st =
                     " has been returned to Player 2's cash")
    ; { hand1 = st.hand1 ; hand2 = st.hand2 ; 
        table = st.table ; cards = st.cards ; cash1 = st.cash1 - st.cash1 ; 
-       cash2 = st.cash2 + (st.previous_bets_2 - st.cash1); 
+       cash2 = st.cash2 + (st.previous_bets_2 -st.previous_bets_1 - st.cash1); 
        pot=st.pot-(st.previous_bets_2 - st.previous_bets_1 - st.cash1)+st.cash1
      ; ante = st.ante ; previous_bets_1 = st.cash1 + st.previous_bets_1;
        previous_bets_2 = st.cash1;
