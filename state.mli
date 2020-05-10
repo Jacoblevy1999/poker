@@ -1,68 +1,68 @@
-(**The State module handles state transitions of the game as it moves
-   through differnet hands of the poker game *)
+(** The State module handles state transitions of the game as it moves
+    through differnet hands of the poker game *)
 
-(**Opens modules which are used in state *)
+(** Opens modules which are used in state. *)
 open Poker
 open Command
 
-(**[hand1] is a card array of player 1's hand *)
+(** [hand1] is a card array of player 1's hand. *)
 type hand1 = card array
 
-(**[hand2] is a card array of player 2's hand *)
+(** [hand2] is a card array of player 2's hand. *)
 type hand2 = card array
 
-(**[table] is a card array of the cards displayed on the table *)
+(** [table] is a card array of the cards displayed on the table. *)
 type table = card array
 
-(**[cards is a cary array that represents the randomized 9 possible cards
-   that will be drawn to be dealt to players and the table*)
+(** [cards] is a cary array that represents the randomized 9 possible cards
+    that will be drawn to be dealt to players and the table. *)
 type cards = card array
 
-(**[cash1] is an int representing casah amount of player 1 *)
+(** [cash1] is an int representing casah amount of player 1. *)
 type cash1 = int
 
-(**[cash2] is an int representing casah amount of player 2 *)
+(** [cash2] is an int representing casah amount of player 2. *)
 type cash2 = int
 
-(**[pot] is an int representing the total pot amount of the hand *)
+(** [pot] is an int representing the total pot amount of the hand. *)
 type pot = int
 
-(**[ante] is an int representing the ante paid by each player at the 
-   beginning of each hand*)
+(** [ante] is an int representing the ante paid by each player at the 
+    beginning of each hand. *)
 type ante = int
 
-(**[previous_bets_1] is an int representing the most recent bet of player 1
-   is 0 if there was no previous bet or raise*)
+(** [previous_bets_1] is an int representing the most recent bet of player 1
+    is 0 if there was no previous bet or raise. *)
 type previous_bets_1 = int
 
-(**[previous_bets_2] is an int representing the most recent bet of player 2
-   is 0 if there was no previous bet or raise*)
+(** [previous_bets_2] is an int representing the most recent bet of player 2
+    is 0 if there was no previous bet or raise. *)
 type previous_bets_2 = int
 
-(**[turn] indicates which player's turn it is. 1 represents Player 1's turn
-   and -1 represents Player 2's turn*)
+(** [turn] indicates which player's turn it is. 1 represents Player 1's turn
+    and -1 represents Player 2's turn. *)
 type turn = int
 
-(**[started] is an int indicating which player started that hand, the int
-   value alternatse between 1 and -1 depending on who began the hand *)
+(** [started] is an int indicating which player started that hand, the int
+    value alternatse between 1 and -1 depending on who began the hand. *)
 type started = int
 
-(**[stage] is an int which indicates what stage of the game state is currently 
-   at, Limited to [-1,0,1,2,3,4]
+(** [stage] is an int which indicates what stage of the game state is currently 
+    at, Limited to [-1,0,1,2,3,4]
 
     Ante-check stage = -1
-   Pre-deal stage = 0
-   Post-deal stage = 1
-   Post-flop stage = 2
-   Post-turn stage = 3
-   Post-river stage = 4
+    Pre-deal stage = 0
+    Post-deal stage = 1
+    Post-flop stage = 2
+    Post-turn stage = 3
+    Post-river stage = 4
 *)
 type stage = int
 
-(**[previous_move] represents the last made move object of that state *)
+(** [previous_move] represents the last made move object of that state. *)
 type previous_move = move list
 
-(**the abstract value type representing a state object *)
+(** the abstract value type representing a state object. *)
 type t = { hand1 : hand1 ; hand2 : hand2 ; 
            table : table ; cards : cards ; cash1 : cash1 ; 
            cash2 : cash2 ; pot : pot ; ante : ante ; 
@@ -70,26 +70,26 @@ type t = { hand1 : hand1 ; hand2 : hand2 ;
          ; turn : turn ; started : started ; stage : stage ; 
            previous_move : previous_move} 
 
-(**[set_stage] allows user to manually set the game state into a certain
-   [stage] *)
+(** [set_stage] allows user to manually set the game state into a certain
+    [stage]. *)
 val set_stage : t -> stage -> t
 
-(**[dea] takes in a state that has not dealt out any cards, and deals out 
-   2 cards each and assigns them to [hand1] and [hand2] without dealing
-   any cards onto [table] *)
+(** [deal] takes in a state that has not dealt out any cards, and deals out 
+    2 cards each and assigns them to [hand1] and [hand2] without dealing
+    any cards onto [table]. *)
 val deal : t -> t
 
-(**[init_state] creates an object state t with given inputs of [cash1] 
-   [cash2] [ante[ and [turn] *)
+(** [init_state] creates an object state t with given inputs of [cash1] 
+    [cash2] [ante] and [turn]. *)
 val init_state : cash1 -> cash2 -> ante -> turn -> t
 
-(**[flop] takes in an object that has already delt out its cards to hand1 
-   and hand2, and inserts 3 card objects into card array [table] *)
+(**[ flop] takes in an object that has already delt out its cards to hand1 
+   and hand2, and inserts 3 card objects into card array [table]. *)
 val flop : t -> t 
 
-(**[turn] takes in an object state that has dealt hands and the flop dealt, 
-   and adds another card object into the card array [table] which represents
-   the flop of a poker hand *)
+(** [turn] takes in an object state that has dealt hands and the flop dealt, 
+    and adds another card object into the card array [table] which represents
+    the flop of a poker hand. *)
 val turn : t -> t 
 
 (**[river] takes in an object state that has dealt hands and flop, turn dealt,
