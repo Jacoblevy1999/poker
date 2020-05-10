@@ -26,7 +26,7 @@ finalcheck: check
 	bash finalcheck.sh
 
 zip:
-	zip poker.zip *.ml* *.json _tags Makefile
+	zip poker.zip *.ml* *.txt _tags Makefile
 	
 docs: docs-public docs-private
 	
