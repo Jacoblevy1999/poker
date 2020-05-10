@@ -7,7 +7,7 @@ let help () = begin print_endline "To place a bet, type 'bet [amount]', i.e. 'be
   print_endline "To check, type 'check'.";
   print_endline "To raise a bet, type 'raise [amount]', i.e. 'raise $30' will raise the bet to $30.";
   print_endline "To call, type 'call'.";
-  print_endline "To fold, type 'fold'.";
+  print_endline "To go all in, type 'all in'.";
   print_endline "To see player 1's cards, enter 'p1 cards'";
   print_endline "To see player 2's cards, enter 'p2 cards'";
   print_endline "To see the money in the pot, enter 'pot'.";
@@ -185,8 +185,8 @@ let command_input state mode=
 
 (**Player vs AI **)
 let rec loop2 state mode= 
-  if state.cash1 < 0 then print_endline "AI has no more money. Please play again!";
-  if state.hand1 = (Array.of_list []) then loop2 (deal state) mode else
+  if state.cash1 < 0 then (print_endline "AI has no more money. Please play again!" ; exit 0)
+  else if state.hand1 = (Array.of_list []) then loop2 (deal state) mode else
     whose_turn state;
   let command = command_input state mode in 
   if state.turn = 1 then print_endline ("The AI "^(string_of_command command));
