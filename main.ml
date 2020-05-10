@@ -267,7 +267,7 @@ let play_game =
   print_endline "How much is the ante?";
   let ante_int = set_ante "" in
   let init = State.init_state buy_in_int buy_in_int ante_int 1 in 
-  help;
+  help ();
   print_endline "Player 1 starts. Enjoy the game!";
   if game_mode = 12 then loop2 (init) "h" else if game_mode = 11 then loop2 (init) "e"
   else loop (init) 
