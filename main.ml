@@ -189,7 +189,7 @@ let rec loop2 state mode=
   else if state.hand1 = (Array.of_list []) then loop2 (deal state) mode else
     whose_turn state;
   let command = command_input state mode in 
-  if state.turn = 1 then print_endline ("The AI "^(string_of_command command));
+  if state.turn = 1 then print_endline ("The AI "^(string_of_command command)); print_endline "";
   match command with
   |Call -> loop2 (new_cards (state) Call) mode
   |Check -> loop2 (new_cards state Check) mode

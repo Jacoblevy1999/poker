@@ -249,12 +249,14 @@ let winner st =
     |"player 1" -> 
       print_string "Player 1 wins with "; 
       print_string (format_lst (Array.to_list st.hand1)); 
+      print_endline "";
       init_state (st.cash1 + st.pot) (st.cash2) (st.ante) (-(st.started))
 
     (**if player 2 wins then reassign pots and reset game accordingly **)
     |"player 2" ->
       print_string "Player 2 wins with "; 
       print_string (format_lst (Array.to_list st.hand2)); 
+      print_endline "";
       init_state (st.cash1) (st.cash2 + st.pot) (st.ante) (-(st.started))
 
     (**if players tie then reassign pots and reset game accordingly **)
