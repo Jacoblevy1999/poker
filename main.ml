@@ -132,14 +132,19 @@ let ante_check_2 state =
 
 (**player v player **)
 let rec loop state : unit = 
+  <<<<<<< HEAD
 
-  (**pre deal stuff **)
-  if state.stage == 0 
-  then (loop (predeal state 0))
-  else if state.stage == -1
-  then loop (ante_check_2 state)
-  else 
-    whose_turn state;
+    (**pre deal stuff **)
+    if state.stage == 0 
+    then (loop (predeal state 0))
+    else if state.stage == -1
+    then loop (ante_check_2 state)
+    else 
+      =======
+      if state.stage == 0 then (loop (predeal state 0))
+      else if state.stage == -1 then loop (ante_check_2 state) else 
+        >>>>>>> 612be107156a09384a4f023914c7e9abeb2f6411
+          whose_turn state;
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move ->
     (print_endline "Invalid move. Enter 'help' to see the list of moves."; Loop) in
@@ -190,7 +195,7 @@ let rec loop2 state mode=
   match command with
   |Call -> loop2 (new_cards (state) Call) mode
   |Check -> loop2 (new_cards state Check) mode
-  |Fold -> print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); loop2 (fold state) mode
+  |Fold -> loop2 (fold state) mode
   |Bet amount -> if amount<>(-1) then loop2 (bet state amount) mode 
     else (print_endline "How much do you want to bet?"); loop2 state mode
   |Raise amount -> if amount<>(-1) then loop2 (raise state amount) mode 
@@ -199,8 +204,10 @@ let rec loop2 state mode=
                                                 else  (print_endline "How much do you want to buy in?"); loop2 state mode) 
     else print_endline "You must finish this hand before buying in for more" ; loop2 state mode
   |Help -> help; loop2 state mode
-  |Cards1 -> print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state mode
-  |Cards2 -> print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state mode
+  |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; 
+                                      (loop2 state mode);) else print_endline (Array.to_list (state.hand1) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state mode
+  |Cards2 -> if state.turn <> -1 then (print_endline "You can't look at player 2's cards!"; 
+                                       (loop2 state mode);) else print_endline (Array.to_list (state.hand2) |> hand_to_input |> pp2); print_endline "Enter 'clear' to hide your cards."; loop2 state mode
   |Cash1 -> print_endline ("$"^string_of_int (state.cash1)); loop2 state mode
   |Cash2 -> print_endline ("$"^string_of_int (state.cash2)); loop2 state mode
   |Pot -> print_endline ("$"^string_of_int (state.pot)); loop2 state mode
