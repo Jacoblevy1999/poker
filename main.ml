@@ -65,7 +65,7 @@ let rec predeal state acc =
   let command = try (Command.parse move) with Invalid_move -> 
     (print_endline "Invalid move"; Loop) in
   match command with 
-  |Deal -> if (acc == 1) then (set_stage (check state) (-1)) else 
+  |Deal -> if (acc = 1) then (set_stage (check state) (-1)) else 
       (predeal (check state) 1)
   |Buy_in amount -> (let buystate = (buyin (state) (amount)) in 
                      predeal buystate acc)
@@ -106,7 +106,7 @@ let ante_check_2 state =
     | true -> print_endline ("\nPlayer 1 does not have enough to pay the ante of $"^  string_of_int state.ante ^ ". You currently have $" ^ string_of_int state.cash1 ^ ". You must buy in for atleast $" ^ string_of_int (state.ante - state.cash1) ^ " more.\n");
 
       (**if its player 1 turn then just buy in for more and move on **)
-      if (state.turn == 1)
+      if (state.turn = 1)
       then (ante_check state)
       (**if it is not player 1 turn, then we make it player 1 turn he buys in, and we return back to original turn *)
       else let tempstate = check state in 
@@ -117,7 +117,7 @@ let ante_check_2 state =
     (**means player 2 does not have enough for ante **)
     | false ->  print_endline ("\nPlayer 2 does not have enough to pay the ante of $"^  string_of_int state.ante ^ ". You currently have $" ^ string_of_int state.cash2 ^ ". You must buy in for atleast $" ^ string_of_int (state.ante - state.cash2) ^ " more.\n");
       (**if its player 1 turn then just buy in for more and move on **)
-      if (state.turn == -1)
+      if (state.turn = -1)
       then (ante_check state)
       (**if it is not player 1 turn, then we make it player 1 turn he buys in, and we return back to original turn *)
       else let tempstate = check state in 
@@ -131,13 +131,10 @@ let ante_check_2 state =
 (**player v player **)
 let rec loop state : unit = 
   (**pre deal stuff **)
-  if state.stage == 0 
-  then (loop (predeal state 0))
-  else if state.stage == -1
-  then loop (ante_check_2 state)
-  else 
-  if state.stage == 0 then (loop (predeal state 0))
-  else if state.stage == -1 then loop (ante_check_2 state) else 
+  if state.stage = 0 then (loop (predeal state 0))
+  else if state.stage = -1 then loop (ante_check_2 state)
+  else if state.stage = 0 then (loop (predeal state 0))
+  else if state.stage = -1 then loop (ante_check_2 state) else 
     whose_turn state;
   let move = read_line () in
   let command = try (Command.parse move) with Invalid_move ->
@@ -149,9 +146,9 @@ let rec loop state : unit =
   |Fold -> loop (fold state)
   |Bet amount -> if amount<>(-1) then loop (bet state amount) else (print_endline "How much do you want to bet?"); loop state
   |Raise amount -> if amount<>(-1) then loop (raise state amount) else (print_endline "How much do you want to raise?"); loop state
-  |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop (buyin state amount)
-                                                else  (print_endline "How much do you want to buy in?"); 
-                                                loop state) else print_endline "You must finish this hand before buying in for more" ; loop state
+  |Buy_in amount -> if (state.stage = 0) then (if amount<>(-1) then loop (buyin state amount)
+                                               else  (print_endline "How much do you want to buy in?"); 
+                                               loop state) else print_endline "You must finish this hand before buying in for more" ; loop state
   |Help -> help (); loop state
   |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; 
                                       (loop state);) else print_endline 
@@ -184,10 +181,10 @@ let command_input state mode=
 
 (**Player vs AI **)
 let rec loop2 state mode= 
-  if state.cash1 < state.ante then (print_endline "AI has no more money. Please play again!" ; exit 0)
-  else if state.cash2 < state.ante then 
-    (print_endline "You do not have enough money left to play. Please play again!" ; exit 0)
-  else if state.hand1 = (Array.of_list []) then loop2 (deal state) mode else
+  if state.hand1 = (Array.of_list []) then
+    if state.cash1 < state.ante then (print_endline "AI has no more money. Please play again!" ; exit 0)
+    else if state.cash2 < state.ante then (print_endline "You don't have enought money. Please play again!" ; exit 0)
+    else loop2 (deal state) mode else
     whose_turn state;
   let command = command_input state mode in 
   if state.turn = 1 then print_endline ("The AI "^(string_of_command command)); print_endline "";
@@ -199,8 +196,8 @@ let rec loop2 state mode=
     else (print_endline "How much do you want to bet?"); loop2 state mode
   |Raise amount -> if amount<>(-1) then loop2 (raise state amount) mode 
     else (print_endline "How much do you want to raise?"); loop2 state mode
-  |Buy_in amount -> if (state.stage == 0) then (if amount<>(-1) then loop2 (buyin state amount) mode
-                                                else  (print_endline "How much do you want to buy in?"); loop2 state mode) 
+  |Buy_in amount -> if (state.stage = 0) then (if amount<>(-1) then loop2 (buyin state amount) mode
+                                               else  (print_endline "How much do you want to buy in?"); loop2 state mode) 
     else print_endline "You must finish this hand before buying in for more" ; loop2 state mode
   |Help -> help (); loop2 state mode
   |Cards1 -> if state.turn <> 1 then (print_endline "You can't look at player 1's cards!"; 
