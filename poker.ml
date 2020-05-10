@@ -248,7 +248,6 @@ let val_dict  = Array.of_list ["two of";"three of";"four of";"five of";
                                "six of";"seven of";
                                "eight of";"nine of";"ten of";"jack of";
                                "queen of";"king of";"ace of"]
-
 let val_dict1 = Array.of_list ["2";"3";"4";"5";"6";"7";
                                "8";"9";"10";"J";"Q";"K";"A"]
 
