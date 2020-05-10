@@ -172,6 +172,24 @@ let tests = "poker test suite" >::: [
     "low 4 kind high 3 kind" >:: (fun _ -> assert_equal "player 2" 
                                      (winner (hand 1 14) (hand 0 13) 
                                         (b_five 23 40 33 26 39)));
+    "better two pair pocket" >:: (fun _ -> assert_equal "player 1" 
+                                     (winner (hand 1 14) (hand 0 13) 
+                                        (b_five 23 36 37 5 51)));
+    "two pair pocket table mix" >:: (fun _ -> assert_equal "player 1" 
+                                        (winner (hand 0 36) (hand 1 39) 
+                                           (b_five 23 13 33 26 14)));
+    "two pair table high pocket" >:: (fun _ -> assert_equal "player 1" 
+                                         (winner (hand 51 0) (hand 5 7) 
+                                            (b_five 23 40 8 21 50)));
+    "same two pair same high" >:: (fun _ -> assert_equal "tie" 
+                                      (winner (hand 12 0) (hand 51 13) 
+                                         (b_five 26 8 21 22 49)));
+    "high card" >:: (fun _ -> assert_equal "player 2" 
+                        (winner (hand 1 14) (hand 0 13) 
+                           (b_five 23 40 33 26 39)));
+
+
+
 
 
   ]
