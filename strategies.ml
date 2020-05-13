@@ -5,7 +5,7 @@ open State
 (** [legal_bet st n] makes sure [n] is a legal bet, given state [st]. If it
     is not a legal bet, it corrects it to be so. *)
 let legal_bet st n : Command.move = 
-  if n = 0 then Check else if n > st.cash1 then AllIn else Bet n
+  if n < st.ante then Check else if n > st.cash1 then AllIn else Bet n
 
 (** [legal_raise st n] makes sure [n] is a legal raise, given state [st]. If it
     is not a legal raise, it corrects it to be so. *)
@@ -114,13 +114,13 @@ let preflop_bet st last pot in_hand : Command.move=
       let bet_prop = (float_of_int (match st.turn with
           | 1 -> st.previous_bets_2
           | _ -> st.previous_bets_1)) /. (float_of_int st.pot) in
-      let heuristic = 3 * strength - (int_of_float (bet_prop *. 10.)) in
-      if heuristic >= 24 then if r > 0.8 then legal_call st else
-          legal_raise st (bet_range (pot) (pot*2)) else if heuristic >= 19
+      let heuristic = 3 * strength - (int_of_float (bet_prop *. 9.)) in
+      if heuristic >= 23 then if r > 0.8 then legal_call st else
+          legal_raise st (bet_range (pot) (pot*2)) else if heuristic >= 18
       then if r > 0.75 then legal_raise st (bet_range (pot) (pot*2))
-        else legal_call st else if heuristic >= 14
+        else legal_call st else if heuristic >= 13
       then if r > 0.9 then legal_raise st (bet_range (pot) (pot*2))
-        else if r > 0.85 then Fold else legal_call st else if heuristic < 9 
+        else legal_call st else if heuristic < 8 
       then Fold else if r < 0.75 then
         Fold else legal_call st
 
@@ -131,7 +131,7 @@ let reactionary_bet chance st =
   let bet_prop = (float_of_int (match st.turn with
       | 1 -> st.previous_bets_2
       | _ -> st.previous_bets_1)) /. (float_of_int st.pot) in
-  let heuristic = 2.5 *. chance -. bet_prop in
+  let heuristic = 2.75 *. chance -. bet_prop in
   if heuristic > 2.05 then legal_raise st (bet_range (st.pot/2) st.pot*4)
   else if heuristic > 1.80 then if r > 0.80 then legal_call st else 
       legal_raise st (bet_range (st.pot/3) st.pot*3) else 
